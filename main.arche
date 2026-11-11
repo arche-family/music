@@ -1,0 +1,167 @@
+/// Music, the Arche phone's, written in Arche, as Android's music players
+/// are: the songs in the phone's shared Music folder (WAV files), a row
+/// each, the one that plays marked; a tap plays a song, from its start, in
+/// the place of what played; and, while one plays, its name and Stop at
+/// the bottom. The phone plays it, one song at a time for the whole phone,
+/// and says what plays; a song played to its end leaves nothing playing.
+/// An app of the page: its taps come as click events.
+///
+/// An app of the phone's world (arche:phone, wit/): it lists the Music
+/// folder through files, and plays through audio (its manifest's needs:
+/// files).
+import alloc;
+import audio;
+import dom;
+import files;
+import host_api;
+import std;
+
+const SHEET: str = "body { padding: 0; } .app { display: flex; flex-direction: column; gap: 12px; padding: 16px; } h1 { font-size: 30px; color: var(--nimadir-text); } .rows { display: flex; flex-direction: column; gap: 8px; } button.row { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px; border-radius: 16px; border: 0; background: var(--nimadir-surface); } button.row.on { background: var(--nimadir-accent-wash); } .name { font-size: 17px; color: var(--nimadir-text); } .what { font-size: 14px; color: var(--nimadir-muted); } .none { font-size: 16px; color: var(--nimadir-muted); } .now { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 24px; background: var(--nimadir-surface); } .playing { font-size: 16px; color: var(--nimadir-text); flex: 1; } button.stop { padding: 10px 20px; border-radius: 20px; border: 0; font-size: 16px; background: var(--nimadir-accent); color: var(--nimadir-bg); } .hidden { display: none; }";
+
+const FOLDER: str = "Music";
+
+type Music = struct {
+    /// What the page shows playing: a path, "" for nothing; and whether the
+    /// rows have been made once.
+    shown: alloc.String,
+    made: bool,
+    /// The page's nodes.
+    rows: u32,
+    empty: u32,
+    now: u32,
+    playing: u32,
+}
+
+fn init(host: &mut std.Host, a: alloc.Allocator) -> Music {
+    _ = dom.add_stylesheet(host, css: SHEET);
+    let root = dom.root(host);
+    let markup = "<div class='app'><h1>Music</h1><div class='none hidden'>No music yet: WAV files in the Music folder</div><div class='rows'></div><div class='now hidden'><div class='playing'></div><button class='stop' data-k='stop'>Stop</button></div></div>";
+    var why = alloc.String.init(a);
+    if not dom.set_markup(host, item: root, markup: markup, why: &mut why, a: a) {
+        host_api.log(host, msg: why.view());
+    }
+    let app = first(host, selector: ".app", a: a);
+    dom.listen(host, item: app, kind: "click");
+    return Music { shown: alloc.String.init(a), made: false, rows: first(host, selector: ".rows", a: a), empty: first(host, selector: ".none", a: a), now: first(host, selector: ".now", a: a), playing: first(host, selector: ".playing", a: a) };
+}
+
+fn update(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
+    for e in dom.events(host, a: a).items() {
+        if e.kind.view().eq("click") {
+            match key_of(host, n: e.target, a: a) {
+                some(k) => {
+                    if k.view().eq("stop") {
+                        audio.stop(host);
+                    } else if k.view().starts_with("s:") {
+                        var path = alloc.String.from(FOLDER, a);
+                        path.push_str("/");
+                        path.push_str(k.view()[2..k.len()]);
+                        _ = audio.play(host, path: path.view());
+                    }
+                }
+                none => { }
+            }
+        }
+    }
+    var now = alloc.String.init(a);
+    match audio.playing(host, a: a) {
+        some(p) => { now = p; }
+        none => { }
+    }
+    if not state.made or not now.view().eq(state.shown.view()) {
+        state.made = true;
+        state.shown = alloc.String.from(now.view(), a);
+        show(state, host: host, a: a);
+    }
+}
+
+/// Whether name is a WAV's.
+fn is_wav(name: str) -> bool {
+    let n = name.len();
+    return n > 4 and (name[n - 4..n].eq(".wav") or name[n - 4..n].eq(".WAV"));
+}
+
+/// The rows, the one that plays marked, and what plays.
+fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
+    for old in dom.children(host, item: state.rows, a: a).items() {
+        dom.release(host, item: old.*);
+    }
+    var count: u32 = 0;
+    for e in files.list(host, path: FOLDER, a: a).items() {
+        if e.folder or not is_wav(e.name.view()) {
+            continue;
+        }
+        count += 1;
+        var path = alloc.String.from(FOLDER, a);
+        path.push_str("/");
+        path.push_str(e.name.view());
+        let on = path.view().eq(state.shown.view());
+        let row = dom.create_element(host, tag: "button");
+        if on {
+            dom.set_attribute(host, item: row, name: "class", value_: "row on");
+        } else {
+            dom.set_attribute(host, item: row, name: "class", value_: "row");
+        }
+        var k = alloc.String.from("s:", a);
+        k.push_str(e.name.view());
+        dom.set_attribute(host, item: row, name: "data-k", value_: k.view());
+        line(host, parent_: row, class: "name", text: title_of(e.name.view()), a: a);
+        if on {
+            line(host, parent_: row, class: "what", text: "Playing", a: a);
+        } else {
+            line(host, parent_: row, class: "what", text: "Tap to play", a: a);
+        }
+        dom.append_child(host, parent_: state.rows, child: row);
+    }
+    dom.toggle_class(host, item: state.empty, name: "hidden", on: count > 0);
+    dom.toggle_class(host, item: state.now, name: "hidden", on: state.shown.len() == 0);
+    if state.shown.len() > 0 {
+        var s = alloc.String.from("Playing ", a);
+        let b = state.shown.view().bytes();
+        var cut = b.len();
+        while cut > 0 and b[cut - 1] != '/' {
+            cut -= 1;
+        }
+        s.push_str(title_of(state.shown.view()[cut..b.len()]));
+        dom.set_text(host, item: state.playing, text: s.view());
+    }
+}
+
+/// A song's name: its file's, without .wav.
+fn title_of(name: str) -> str {
+    if is_wav(name) {
+        return name[0..name.len() - 4];
+    }
+    return name;
+}
+
+/// A div of class with text, last under parent_.
+fn line(host: &mut std.Host, parent_: u32, class: str, text: str, a: alloc.Allocator) {
+    let d = dom.create_element(host, tag: "div");
+    dom.set_attribute(host, item: d, name: "class", value_: class);
+    dom.set_text(host, item: d, text: text);
+    dom.append_child(host, parent_: parent_, child: d);
+}
+
+/// The first node under the page that selector finds; 0 for none.
+fn first(host: &mut std.Host, selector: str, a: alloc.Allocator) -> u32 {
+    let found = dom.query_all(host, scope: dom.root(host), selector: selector, a: a);
+    if found.len() == 0 {
+        return 0;
+    }
+    return found.items()[0];
+}
+
+/// The key a click on n is: its data-k, or its nearest ancestor's.
+fn key_of(host: &mut std.Host, n: u32, a: alloc.Allocator) -> ?alloc.String {
+    var at = n;
+    var hops: u32 = 0;
+    while at != 0 and hops < 8 : (hops += 1) {
+        match dom.get_attribute(host, item: at, name: "data-k", a: a) {
+            some(k) => { return k; }
+            none => { }
+        }
+        at = dom.parent(host, item: at) orelse 0;
+    }
+    return none;
+}

@@ -1,0 +1,1 @@
+--frames 4 --share arche:phone/files@0.1.0=media --click 1:12,2:10 --add arche:phone/audio@0.1.0#play=true --add arche:phone/audio@0.1.0#stop --add arche:phone/audio@0.1.0#playing=none

@@ -1,0 +1,6 @@
+name: music
+version: 1
+title: Music
+about: The songs in the phone's Music folder, in Arche
+publisher: arche
+needs: files
