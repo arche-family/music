@@ -1,13 +1,13 @@
 === headless run: 4 frames ===
 
 --- frame 0  (clicks fed to guest: []) ---
-   [page] 21 nodes
+   [page] 26 nodes
    #1 body
      #2 div.app {click}
        #3 h1
          #4 "Music"
        #5 div.none.hidden
-         #6 "No music yet: WAV files in the Music folder"
+         #6 "No music yet: music files in the Music folder"
        #7 div.rows
          #12 button.row [data-k="s:Evening.wav"]
            #13 div.name
@@ -19,6 +19,11 @@
              #19 "Morning"
            #20 div.what
              #21 "Tap to play"
+         #22 button.row [data-k="s:Noon.mp3"]
+           #23 div.name
+             #24 "Noon"
+           #25 div.what
+             #26 "Tap to play"
        #8 div.now.hidden
          #9 div.playing
          #10 button.stop [data-k="stop"]
@@ -27,13 +32,13 @@
 
 --- frame 1  (clicks fed to guest: []) ---
    [tap] #12
-   [page] 21 nodes
+   [page] 26 nodes
    #1 body
      #2 div.app {click}
        #3 h1
          #4 "Music"
        #5 div.none.hidden
-         #6 "No music yet: WAV files in the Music folder"
+         #6 "No music yet: music files in the Music folder"
        #7 div.rows
          #12 button.row [data-k="s:Evening.wav"]
            #13 div.name
@@ -45,6 +50,11 @@
              #19 "Morning"
            #20 div.what
              #21 "Tap to play"
+         #22 button.row [data-k="s:Noon.mp3"]
+           #23 div.name
+             #24 "Noon"
+           #25 div.what
+             #26 "Tap to play"
        #8 div.now.hidden
          #9 div.playing
          #10 button.stop [data-k="stop"]
@@ -54,13 +64,13 @@
 
 --- frame 2  (clicks fed to guest: []) ---
    [tap] #10
-   [page] 21 nodes
+   [page] 26 nodes
    #1 body
      #2 div.app {click}
        #3 h1
          #4 "Music"
        #5 div.none.hidden
-         #6 "No music yet: WAV files in the Music folder"
+         #6 "No music yet: music files in the Music folder"
        #7 div.rows
          #12 button.row [data-k="s:Evening.wav"]
            #13 div.name
@@ -72,6 +82,11 @@
              #19 "Morning"
            #20 div.what
              #21 "Tap to play"
+         #22 button.row [data-k="s:Noon.mp3"]
+           #23 div.name
+             #24 "Noon"
+           #25 div.what
+             #26 "Tap to play"
        #8 div.now.hidden
          #9 div.playing
          #10 button.stop [data-k="stop"]
@@ -80,13 +95,13 @@
    [call] arche:phone/audio@0.1.0#playing()
 
 --- frame 3  (clicks fed to guest: []) ---
-   [page] 21 nodes
+   [page] 26 nodes
    #1 body
      #2 div.app {click}
        #3 h1
          #4 "Music"
        #5 div.none.hidden
-         #6 "No music yet: WAV files in the Music folder"
+         #6 "No music yet: music files in the Music folder"
        #7 div.rows
          #12 button.row [data-k="s:Evening.wav"]
            #13 div.name
@@ -98,6 +113,11 @@
              #19 "Morning"
            #20 div.what
              #21 "Tap to play"
+         #22 button.row [data-k="s:Noon.mp3"]
+           #23 div.name
+             #24 "Noon"
+           #25 div.what
+             #26 "Tap to play"
        #8 div.now.hidden
          #9 div.playing
          #10 button.stop [data-k="stop"]

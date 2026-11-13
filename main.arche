@@ -1,5 +1,5 @@
 /// Music, the Arche phone's, written in Arche, as Android's music players
-/// are: the songs in the phone's shared Music folder (WAV files), a row
+/// are: the songs in the phone's shared Music folder (WAV, FLAC, Ogg Vorbis and MP3 files), a row
 /// each, the one that plays marked; a tap plays a song, from its start, in
 /// the place of what played; and, while one plays, its name and Stop at
 /// the bottom. The phone plays it, one song at a time for the whole phone,
@@ -35,7 +35,7 @@ type Music = struct {
 fn init(host: &mut std.Host, a: alloc.Allocator) -> Music {
     _ = dom.add_stylesheet(host, css: SHEET);
     let root = dom.root(host);
-    let markup = "<div class='app'><h1>Music</h1><div class='none hidden'>No music yet: WAV files in the Music folder</div><div class='rows'></div><div class='now hidden'><div class='playing'></div><button class='stop' data-k='stop'>Stop</button></div></div>";
+    let markup = "<div class='app'><h1>Music</h1><div class='none hidden'>No music yet: music files in the Music folder</div><div class='rows'></div><div class='now hidden'><div class='playing'></div><button class='stop' data-k='stop'>Stop</button></div></div>";
     var why = alloc.String.init(a);
     if not dom.set_markup(host, item: root, markup: markup, why: &mut why, a: a) {
         host_api.log(host, msg: why.view());
@@ -75,10 +75,36 @@ fn update(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
     }
 }
 
-/// Whether name is a WAV's.
-fn is_wav(name: str) -> bool {
+/// Whether name ends with tail, in any case of ASCII letters.
+fn ends(name: str, tail: str) -> bool {
     let n = name.len();
-    return n > 4 and (name[n - 4..n].eq(".wav") or name[n - 4..n].eq(".WAV"));
+    let t = tail.len();
+    if n <= t {
+        return false;
+    }
+    var i: usize = 0;
+    while i < t : (i += 1) {
+        var c = name.bytes()[n - t + i];
+        if c >= 'A' and c <= 'Z' {
+            c = c + 32;
+        }
+        if c != tail.bytes()[i] {
+            return false;
+        }
+    }
+    return true;
+}
+
+/// The length of name's extension when it is a music file's the phone
+/// plays (WAV, FLAC, Ogg Vorbis, MP3), with its dot; 0 for another.
+fn music_ext(name: str) -> usize {
+    if ends(name: name, tail: ".wav") or ends(name: name, tail: ".mp3") or ends(name: name, tail: ".ogg") {
+        return 4;
+    }
+    if ends(name: name, tail: ".flac") {
+        return 5;
+    }
+    return 0;
 }
 
 /// The rows, the one that plays marked, and what plays.
@@ -88,7 +114,7 @@ fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
     }
     var count: u32 = 0;
     for e in files.list(host, path: FOLDER, a: a).items() {
-        if e.folder or not is_wav(e.name.view()) {
+        if e.folder or music_ext(e.name.view()) == 0 {
             continue;
         }
         count += 1;
@@ -127,12 +153,10 @@ fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
     }
 }
 
-/// A song's name: its file's, without .wav.
+/// A song's name: its file's, without its extension.
 fn title_of(name: str) -> str {
-    if is_wav(name) {
-        return name[0..name.len() - 4];
-    }
-    return name;
+    let ext = music_ext(name);
+    return name[0..name.len() - ext];
 }
 
 /// A div of class with text, last under parent_.
