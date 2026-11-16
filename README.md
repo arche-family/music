@@ -22,7 +22,7 @@ With [arche-lang](https://github.com/arche-family/arche-lang) checked out next t
 
 ## Test
 
-`media/Music` holds two short WAV files, a short MP3 and a text file, which is not music. `headless` holds the taps of a headless run, with `media/` shared as the phone shares its files (arche-wasm's `--share`) and the functions the phone's world adds: a song played, its call made, and Stop. `expected.txt` holds what arche-wasm's interpreter said, as Nimadir's shell does not run the phone's world. `app-check.sh` runs the app with arche-wasm, by the interpreter and by the JIT, each in a fresh copy of this directory, and compares what it says with `expected.txt`. CI runs it on every push. The song heard, through the phone's sound card, is tried on the phone by arche-os's `tests/phone.sh`.
+`media/Music` holds two short WAV files, a short MP3 and a text file, which is not music. `headless` holds the taps of a headless run, with `media/` shared as the phone shares its files (arche-wasm's `--share`) and the functions the phone's world adds: a song played, its call made, and Stop. `expected.txt` holds what arche-wasm's interpreter said, as Nimadir's shell does not run the phone's world. `app-check.sh` runs the app with arche-wasm, by the interpreter and by the JIT, each in a fresh copy of this directory, and compares what it says with `expected.txt`. CI runs it when started by hand (Actions' Run workflow). The song heard, through the phone's sound card, is tried on the phone by arche-os's `tests/phone.sh`.
 
 ```sh
 ../arche-lang/wasm/app-check.sh .
