@@ -10,13 +10,14 @@
 /// folder through files, and plays through audio (its manifest's needs:
 /// files).
 import alloc;
+import appkit;
 import audio;
 import dom;
 import files;
 import host_api;
 import std;
 
-const SHEET: str = "body { padding: 0; } .app { display: flex; flex-direction: column; gap: 12px; padding: 16px; } h1 { font-size: 30px; color: var(--nimadir-text); } .rows { display: flex; flex-direction: column; gap: 8px; } button.row { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px; border-radius: 16px; border: 0; background: var(--nimadir-surface); } button.row.on { background: var(--nimadir-accent-wash); } .name { font-size: 17px; color: var(--nimadir-text); } .what { font-size: 14px; color: var(--nimadir-muted); } .none { font-size: 16px; color: var(--nimadir-muted); } .now { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 24px; background: var(--nimadir-surface); } .playing { font-size: 16px; color: var(--nimadir-text); flex: 1; } button.stop { padding: 10px 20px; border-radius: 20px; border: 0; font-size: 16px; background: var(--nimadir-accent); color: var(--nimadir-bg); } .hidden { display: none; }";
+const SHEET: str = ".rows.hidden, .none.hidden, .now.hidden { display: none; } button.row.on .primary { color: var(--kit-accent); } .now { display: flex; flex-direction: row; align-items: center; gap: 12px; margin: 0 14px; padding: 12px 12px 12px 18px; border-radius: 22px; background: var(--kit-card); } .playing { font-size: 16px; font-weight: 500; color: var(--kit-text); flex-grow: 1; } button.stop { width: 46px; height: 46px; border-radius: 23px; border: 0; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--kit-accent); color: #ffffff; } .hidden { display: none; }";
 
 const FOLDER: str = "Music";
 
@@ -33,9 +34,11 @@ type Music = struct {
 }
 
 fn init(host: &mut std.Host, a: alloc.Allocator) -> Music {
+    let kit = appkit.css(a);
+    _ = dom.add_stylesheet(host, css: kit.view());
     _ = dom.add_stylesheet(host, css: SHEET);
     let root = dom.root(host);
-    let markup = "<div class='app'><h1>Music</h1><div class='none hidden'>No music yet: music files in the Music folder</div><div class='rows'></div><div class='now hidden'><div class='playing'></div><button class='stop' data-k='stop'>Stop</button></div></div>";
+    let markup = "<div class='app'><div class='content'><div class='big'>Music</div><div class='empty none hidden'><span class='icon'>library_music</span><div>No music yet: music files in the Music folder</div></div><div class='group rows'></div></div><div class='now hidden'><div class='playing'></div><button class='stop' data-k='stop'><span class='icon fill'>stop</span></button></div><div class='tail'></div></div>";
     var why = alloc.String.init(a);
     if not dom.set_markup(host, item: root, markup: markup, why: &mut why, a: a) {
         host_api.log(host, msg: why.view());
@@ -131,12 +134,24 @@ fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
         var k = alloc.String.from("s:", a);
         k.push_str(e.name.view());
         dom.set_attribute(host, item: row, name: "data-k", value_: k.view());
-        line(host, parent_: row, class: "name", text: title_of(e.name.view()), a: a);
+        // Its note on a tile, its name over what a tap does.
+        let tile = dom.create_element(host, tag: "div");
+        dom.set_attribute(host, item: tile, name: "class", value_: "tile");
+        dom.set_attribute(host, item: tile, name: "style", value_: "background: #f0476a");
+        let glyph = dom.create_element(host, tag: "span");
+        dom.set_attribute(host, item: glyph, name: "class", value_: "icon fill");
+        dom.set_text(host, item: glyph, text: "music_note");
+        dom.append_child(host, parent_: tile, child: glyph);
+        dom.append_child(host, parent_: row, child: tile);
+        let lines = dom.create_element(host, tag: "div");
+        dom.set_attribute(host, item: lines, name: "class", value_: "lines");
+        line(host, parent_: lines, class: "primary name", text: title_of(e.name.view()), a: a);
         if on {
-            line(host, parent_: row, class: "what", text: "Playing", a: a);
+            line(host, parent_: lines, class: "secondary what", text: "Playing", a: a);
         } else {
-            line(host, parent_: row, class: "what", text: "Tap to play", a: a);
+            line(host, parent_: lines, class: "secondary what", text: "Tap to play", a: a);
         }
+        dom.append_child(host, parent_: row, child: lines);
         dom.append_child(host, parent_: state.rows, child: row);
     }
     dom.toggle_class(host, item: state.empty, name: "hidden", on: count > 0);
