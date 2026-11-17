@@ -10,7 +10,9 @@
 /// Previous, Pause and Next, Shuffle and Repeat (all, one, none). A song
 /// played to its end leaves for the next, as Repeat says. The phone's
 /// Back closes the player. An app of the page: its taps come as click
-/// events.
+/// events. It says its words in the phone's language (host_api.locale):
+/// English, Uzbek or Russian, the page made again when the language
+/// changes, what plays playing on.
 ///
 /// An app of the phone's world (arche:phone, wit/): it lists the Music
 /// folder and reads a song's tags (its first bytes, and an MP4's last)
@@ -24,7 +26,7 @@ import files;
 import host_api;
 import std;
 
-const SHEET: str = ".count { font-size: 14px; color: var(--kit-muted); padding: 0 24px 8px; margin-top: -10px; } .tools { display: flex; flex-direction: row; padding: 4px 16px 10px; } .shuffle { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 0 18px 0 14px; height: 40px; border-radius: 20px; border: 0; background: var(--kit-accent); color: #ffffff; font-size: 15px; font-weight: 500; } .songs { display: flex; flex-direction: column; padding-bottom: 96px; } button.song { display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%; box-sizing: border-box; padding: 8px 20px; font-weight: 400; border: 0; border-radius: 0; background: transparent; text-align: left; color: var(--kit-text); } .cover { width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #ffffff; overflow: hidden; } .cover img { width: 52px; height: 52px; object-fit: cover; } .song .lines { gap: 3px; } .song .primary { font-size: 16px; } .song.on .primary { color: var(--kit-accent); font-weight: 500; } .len { font-size: 13px; color: var(--kit-muted); flex-shrink: 0; } .mini { position: fixed; left: 8px; right: 8px; bottom: 8px; display: flex; flex-direction: column; border-radius: 20px; background: var(--kit-card); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16); overflow: hidden; } .mini .row { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 8px 8px 8px 10px; min-height: 0; } .mini .cover { width: 44px; height: 44px; border-radius: 10px; } .mini .cover img { width: 44px; height: 44px; } .mini .lines { flex-grow: 1; min-width: 0; } .mini .primary { font-size: 15px; font-weight: 500; } .track { height: 3px; background: var(--kit-line); } .done { height: 3px; background: var(--kit-accent); } .player { display: flex; flex-direction: column; min-height: 100vh; } .player .head { padding-left: 8px; } .art { align-self: center; width: 300px; height: 300px; border-radius: 24px; margin: 16px 0 28px; display: flex; align-items: center; justify-content: center; color: #ffffff; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); } .art img { width: 300px; height: 300px; object-fit: cover; } .art .icon { font-size: 120px; } .names { display: flex; flex-direction: column; gap: 4px; padding: 0 30px; } .pname { font-size: 22px; font-weight: 600; color: var(--kit-text); } .partist { font-size: 16px; color: var(--kit-muted); } .seek { position: relative; margin: 32px 30px 0; height: 4px; } .seek .bar { height: 4px; border-radius: 2px; background: var(--kit-line); overflow: hidden; } .seek .fill { height: 4px; background: var(--kit-accent); } .cuts { position: absolute; left: 0; right: 0; top: -12px; height: 28px; display: flex; flex-direction: row; } button.cut { flex-grow: 1; height: 28px; padding: 0; border: 0; border-radius: 0; background: transparent; } .times { display: flex; flex-direction: row; justify-content: space-between; padding: 10px 30px 0; font-size: 12px; color: var(--kit-muted); } .keys { display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 18px 22px 0; } .keys .iconbtn .icon { font-size: 30px; } .keys .side .icon { font-size: 24px; color: var(--kit-muted); } .keys .side.on .icon { color: var(--kit-accent); } .big { } button.play { width: 72px; height: 72px; border-radius: 36px; border: 0; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--kit-accent); color: #ffffff; } button.play .icon { font-size: 40px; } .hidden { display: none; }";
+const SHEET: str = ".count { font-size: 14px; color: var(--kit-muted); padding: 0 24px 8px; margin-top: -10px; } .tools { display: flex; flex-direction: row; padding: 4px 16px 10px; } .shuffle { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 0 18px 0 14px; height: 40px; border-radius: 20px; border: 0; background: var(--kit-accent); color: #ffffff; font-size: 15px; font-weight: 500; } .songs { display: flex; flex-direction: column; padding-bottom: 96px; } button.song { display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%; box-sizing: border-box; padding: 8px 20px; font-weight: 400; border: 0; border-radius: 0; background: transparent; text-align: left; color: var(--kit-text); } .cover { width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #ffffff; overflow: hidden; } .cover img { width: 52px; height: 52px; object-fit: cover; } .song .lines { gap: 3px; } .song .primary { font-size: 16px; } .song.on .primary { color: var(--kit-accent); font-weight: 500; } .len { font-size: 13px; color: var(--kit-muted); flex-shrink: 0; } .mini { position: fixed; left: 8px; right: 8px; bottom: 8px; display: flex; flex-direction: column; border-radius: 20px; background: var(--kit-card); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16); overflow: hidden; } .mini .row { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 8px 8px 8px 10px; min-height: 0; } .mini .cover { width: 44px; height: 44px; border-radius: 10px; } .mini .cover img { width: 44px; height: 44px; } .mini .lines { flex-grow: 1; min-width: 0; } .mini .primary { font-size: 15px; font-weight: 500; } .track { height: 3px; background: var(--kit-line); } .done { height: 3px; background: var(--kit-accent); } .player { display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box; } .player .head { padding-left: 8px; } .art { align-self: center; width: 312px; height: 312px; border-radius: 24px; margin: 20px 0 0; display: flex; align-items: center; justify-content: center; color: #ffffff; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); } .art img { width: 312px; height: 312px; object-fit: cover; } .lower { margin-top: auto; padding: 24px 0 48px; } .art .icon { font-size: 120px; } .names { display: flex; flex-direction: column; gap: 4px; padding: 0 30px; } .pname { font-size: 22px; font-weight: 600; color: var(--kit-text); } .partist { font-size: 16px; color: var(--kit-muted); } .seek { position: relative; margin: 32px 30px 0; height: 4px; } .seek .bar { height: 4px; border-radius: 2px; background: var(--kit-line); overflow: hidden; } .seek .seekfill { height: 4px; background: var(--kit-accent); } .knob { position: absolute; top: -6px; width: 16px; height: 16px; margin-left: -8px; border-radius: 8px; background: var(--kit-accent); } .cuts { position: absolute; left: 0; right: 0; top: -12px; height: 28px; display: flex; flex-direction: row; } button.cut { flex-grow: 1; height: 28px; padding: 0; border: 0; border-radius: 0; background: transparent; } .times { display: flex; flex-direction: row; justify-content: space-between; padding: 10px 30px 0; font-size: 12px; color: var(--kit-muted); } .keys { display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 18px 22px 0; } .keys .iconbtn .icon { font-size: 30px; } .keys .side .icon { font-size: 24px; color: var(--kit-muted); } .keys .side.on .icon { color: var(--kit-accent); } .big { } button.play { width: 72px; height: 72px; border-radius: 36px; border: 0; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--kit-accent); color: #ffffff; } button.play .icon { font-size: 40px; } .hidden { display: none; }";
 
 const FOLDER: str = "Music";
 
@@ -41,9 +43,15 @@ const REPEAT_ALL: u32 = 0;
 const REPEAT_ONE: u32 = 1;
 const REPEAT_OFF: u32 = 2;
 
+/// The languages the app speaks.
+const EN: u32 = 0;
+const UZ: u32 = 1;
+const RU: u32 = 2;
+
 /// A song: its file's name, its tags' title, artist and album (its file's
-/// name, Unknown artist, nothing, where they say none), its length in ms
-/// (0 unknown), its cover's image (NO_IMAGE for none) and its color.
+/// name, nothing, nothing, where they say none: Unknown artist is said
+/// for no artist), its length in ms (0 unknown), its cover's image
+/// (NO_IMAGE for none) and its color.
 type Song = struct {
     name: alloc.String,
     title: alloc.String,
@@ -71,6 +79,10 @@ type Music = struct {
     made: bool,
     marked: usize,
     seed: u64,
+    /// The phone's language (EN, UZ, RU), and its locale as the phone said
+    /// it, to make the page again when it changes.
+    lang: u32,
+    locale: alloc.String,
     /// The page's nodes.
     list: u32,
     count: u32,
@@ -87,6 +99,7 @@ type Music = struct {
     pname: u32,
     partist: u32,
     fill: u32,
+    knob: u32,
     at_time: u32,
     all_time: u32,
     play_icon: u32,
@@ -99,24 +112,7 @@ fn init(host: &mut std.Host, a: alloc.Allocator) -> Music {
     let kit = appkit.css(a);
     _ = dom.add_stylesheet(host, css: kit.view());
     _ = dom.add_stylesheet(host, css: SHEET);
-    let root = dom.root(host);
-    var m = alloc.String.from("<div class='app'><div class='list'><div class='big'>Music</div><div class='count'></div><div class='tools'><button class='shuffle' data-k='shuffle-all'><span class='icon'>shuffle</span><span>Shuffle all</span></button></div><div class='empty hidden'><span class='icon'>library_music</span><div>No music yet: songs in the Music folder</div></div><div class='songs'></div>", a);
-    m.push_str("<div class='mini hidden'><div class='track'><div class='done'></div></div><div class='row' data-k='open'><div class='cover minicover'></div><div class='lines'><div class='primary minititle'></div><div class='secondary miniartist'></div></div><button class='iconbtn' data-k='toggle'><span class='icon fill miniplay'>pause</span></button><button class='iconbtn' data-k='next'><span class='icon fill'>skip_next</span></button></div></div></div>");
-    m.push_str("<div class='player hidden'><div class='head'><button class='iconbtn' data-k='close'><span class='icon'>expand_more</span></button></div><div class='art'></div><div class='names'><div class='pname'></div><div class='partist'></div></div><div class='seek'><div class='bar'><div class='fill'></div></div><div class='cuts'>");
-    var k: u32 = 0;
-    while k < CUTS : (k += 1) {
-        m.push_str("<button class='cut' data-k='cut:");
-        m.push_u64(k as u64);
-        m.push_str("'></button>");
-    }
-    m.push_str("</div></div><div class='times'><span class='attime'>0:00</span><span class='alltime'>0:00</span></div><div class='keys'><button class='iconbtn side shufflebtn' data-k='shuffle'><span class='icon'>shuffle</span></button><button class='iconbtn' data-k='prev'><span class='icon fill'>skip_previous</span></button><button class='play' data-k='toggle'><span class='icon fill playicon'>pause</span></button><button class='iconbtn' data-k='next'><span class='icon fill'>skip_next</span></button><button class='iconbtn side on repeatbtn' data-k='repeat'><span class='icon repeaticon'>repeat</span></button></div></div></div>");
-    var why = alloc.String.init(a);
-    if not dom.set_markup(host, item: root, markup: m.view(), why: &mut why, a: a) {
-        host_api.log(host, msg: why.view());
-    }
-    let app = first(host, selector: ".app", a: a);
-    dom.listen(host, item: app, kind: "click");
-    dom.listen(host, item: root, kind: "back");
+    let locale = host_api.locale(host, a: a);
     var state = Music {
         songs: alloc.List(Song).init(a),
         current: NONE,
@@ -129,30 +125,165 @@ fn init(host: &mut std.Host, a: alloc.Allocator) -> Music {
         made: false,
         marked: NONE,
         seed: (host_api.now_millis(host) as u64) | 1,
-        list: first(host, selector: ".list", a: a),
-        count: first(host, selector: ".count", a: a),
-        rows: first(host, selector: ".songs", a: a),
-        empty: first(host, selector: ".empty", a: a),
-        mini: first(host, selector: ".mini", a: a),
-        mini_cover: first(host, selector: ".minicover", a: a),
-        mini_title: first(host, selector: ".minititle", a: a),
-        mini_artist: first(host, selector: ".miniartist", a: a),
-        mini_done: first(host, selector: ".done", a: a),
-        mini_play: first(host, selector: ".miniplay", a: a),
-        player: first(host, selector: ".player", a: a),
-        art: first(host, selector: ".art", a: a),
-        pname: first(host, selector: ".pname", a: a),
-        partist: first(host, selector: ".partist", a: a),
-        fill: first(host, selector: ".fill", a: a),
-        at_time: first(host, selector: ".attime", a: a),
-        all_time: first(host, selector: ".alltime", a: a),
-        play_icon: first(host, selector: ".playicon", a: a),
-        shuffle_btn: first(host, selector: ".shufflebtn", a: a),
-        repeat_btn: first(host, selector: ".repeatbtn", a: a),
-        repeat_icon: first(host, selector: ".repeaticon", a: a),
+        lang: lang_of(locale.view()),
+        locale: alloc.String.from(locale.view(), a),
+        list: 0,
+        count: 0,
+        rows: 0,
+        empty: 0,
+        mini: 0,
+        mini_cover: 0,
+        mini_title: 0,
+        mini_artist: 0,
+        mini_done: 0,
+        mini_play: 0,
+        player: 0,
+        art: 0,
+        pname: 0,
+        partist: 0,
+        fill: 0,
+        knob: 0,
+        at_time: 0,
+        all_time: 0,
+        play_icon: 0,
+        shuffle_btn: 0,
+        repeat_btn: 0,
+        repeat_icon: 0,
     };
+    page(&mut state, host: host, a: a);
     load(&mut state, host: host, a: a);
     return state;
+}
+
+/// The page, in the phone's language: its markup made, and its nodes; the
+/// rows are made by show.
+fn page(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
+    let l = state.lang;
+    let root = dom.root(host);
+    var m = alloc.String.from("<div class='app'><div class='list'><div class='big'>", a);
+    m.push_str(say(l, s: "Music"));
+    m.push_str("</div><div class='count'></div><div class='tools'><button class='shuffle' data-k='shuffle-all'><span class='icon'>shuffle</span><span>");
+    m.push_str(say(l, s: "Shuffle all"));
+    m.push_str("</span></button></div><div class='empty hidden'><span class='icon'>library_music</span><div>");
+    m.push_str(say(l, s: "No music yet: songs in the Music folder"));
+    m.push_str("</div></div><div class='songs'></div>");
+    m.push_str("<div class='mini hidden'><div class='track'><div class='done'></div></div><div class='row' data-k='open'><div class='cover minicover'></div><div class='lines'><div class='primary minititle'></div><div class='secondary miniartist'></div></div><button class='iconbtn' data-k='toggle'><span class='icon fill miniplay'>pause</span></button><button class='iconbtn' data-k='next'><span class='icon fill'>skip_next</span></button></div></div></div>");
+    m.push_str("<div class='player hidden'><div class='head'><button class='iconbtn' data-k='close'><span class='icon'>expand_more</span></button></div><div class='art'></div><div class='lower'><div class='names'><div class='pname'></div><div class='partist'></div></div><div class='seek'><div class='bar'><div class='seekfill'></div></div><div class='knob'></div><div class='cuts'>");
+    var k: u32 = 0;
+    while k < CUTS : (k += 1) {
+        m.push_str("<button class='cut' data-k='cut:");
+        m.push_u64(k as u64);
+        m.push_str("'></button>");
+    }
+    m.push_str("</div></div><div class='times'><span class='attime'>0:00</span><span class='alltime'>0:00</span></div><div class='keys'><button class='iconbtn side shufflebtn' data-k='shuffle'><span class='icon'>shuffle</span></button><button class='iconbtn' data-k='prev'><span class='icon fill'>skip_previous</span></button><button class='play' data-k='toggle'><span class='icon fill playicon'>pause</span></button><button class='iconbtn' data-k='next'><span class='icon fill'>skip_next</span></button><button class='iconbtn side on repeatbtn' data-k='repeat'><span class='icon repeaticon'>repeat</span></button></div></div></div></div>");
+    var why = alloc.String.init(a);
+    if not dom.set_markup(host, item: root, markup: m.view(), why: &mut why, a: a) {
+        host_api.log(host, msg: why.view());
+    }
+    let app = first(host, selector: ".app", a: a);
+    dom.listen(host, item: app, kind: "click");
+    dom.listen(host, item: root, kind: "back");
+    state.list = first(host, selector: ".list", a: a);
+    state.count = first(host, selector: ".count", a: a);
+    state.rows = first(host, selector: ".songs", a: a);
+    state.empty = first(host, selector: ".empty", a: a);
+    state.mini = first(host, selector: ".mini", a: a);
+    state.mini_cover = first(host, selector: ".minicover", a: a);
+    state.mini_title = first(host, selector: ".minititle", a: a);
+    state.mini_artist = first(host, selector: ".miniartist", a: a);
+    state.mini_done = first(host, selector: ".done", a: a);
+    state.mini_play = first(host, selector: ".miniplay", a: a);
+    state.player = first(host, selector: ".player", a: a);
+    state.art = first(host, selector: ".art", a: a);
+    state.pname = first(host, selector: ".pname", a: a);
+    state.partist = first(host, selector: ".partist", a: a);
+    state.fill = first(host, selector: ".seekfill", a: a);
+    state.knob = first(host, selector: ".knob", a: a);
+    state.at_time = first(host, selector: ".attime", a: a);
+    state.all_time = first(host, selector: ".alltime", a: a);
+    state.play_icon = first(host, selector: ".playicon", a: a);
+    state.shuffle_btn = first(host, selector: ".shufflebtn", a: a);
+    state.repeat_btn = first(host, selector: ".repeatbtn", a: a);
+    state.repeat_icon = first(host, selector: ".repeaticon", a: a);
+}
+
+/// The language of a locale the phone says ("uz-UZ", "ru-RU", "en-US").
+fn lang_of(locale: str) -> u32 {
+    if locale.starts_with("uz") {
+        return UZ;
+    }
+    if locale.starts_with("ru") {
+        return RU;
+    }
+    return EN;
+}
+
+/// s, a word or words of the app's in English, in lang: s itself in
+/// English, and for what it has no words for.
+fn say(lang: u32, s: str) -> str {
+    if s.eq("Music") {
+        if lang == UZ {
+            return "Musiqa";
+        }
+        if lang == RU {
+            return "Музыка";
+        }
+    }
+    if s.eq("Shuffle all") {
+        if lang == UZ {
+            return "Aralash ijro";
+        }
+        if lang == RU {
+            return "Перемешать все";
+        }
+    }
+    if s.eq("No music yet: songs in the Music folder") {
+        if lang == UZ {
+            return "Hali musiqa yoʻq: qoʻshiqlar Music jildida";
+        }
+        if lang == RU {
+            return "Музыки пока нет: песни в папке Music";
+        }
+    }
+    if s.eq("Unknown artist") {
+        if lang == UZ {
+            return "Nomaʼlum ijrochi";
+        }
+        if lang == RU {
+            return "Неизвестный исполнитель";
+        }
+    }
+    return s;
+}
+
+/// How many songs there are, in lang: "16 songs", "16 ta qoʻshiq",
+/// "16 песен".
+fn count_said(n: u64, lang: u32, out: &mut alloc.String) {
+    out.push_u64(n);
+    if lang == UZ {
+        out.push_str(" ta qoʻshiq");
+    } else if lang == RU {
+        // Russian's plural: one (1, 21, 101), few (2-4, 22-24), many.
+        if n % 10 == 1 and n % 100 != 11 {
+            out.push_str(" песня");
+        } else if n % 10 >= 2 and n % 10 <= 4 and (n % 100 < 12 or n % 100 > 14) {
+            out.push_str(" песни");
+        } else {
+            out.push_str(" песен");
+        }
+    } else if n == 1 {
+        out.push_str(" song");
+    } else {
+        out.push_str(" songs");
+    }
+}
+
+/// A song's artist, in lang: Unknown artist for none.
+fn artist_of(song: &Song, lang: u32) -> str {
+    if song.artist.len() == 0 {
+        return say(lang, s: "Unknown artist");
+    }
+    return song.artist.view();
 }
 
 fn update(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
@@ -165,6 +296,16 @@ fn update(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
                 none => { }
             }
         }
+    }
+    // The phone's language changed: the page made again in it, its rows,
+    // what plays and the player by show below. What plays plays on.
+    let locale = host_api.locale(host, a: a);
+    if not locale.view().eq(state.locale.view()) {
+        state.lang = lang_of(locale.view());
+        state.locale = alloc.String.from(locale.view(), a);
+        page(state, host: host, a: a);
+        state.made = false;
+        state.marked = NONE;
     }
     // What the phone plays now; a song played to its end leaves for the
     // next one.
@@ -391,9 +532,6 @@ fn load(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
         path.push_str(n);
         var song = Song { name: alloc.String.from(n, a), title: alloc.String.from(n[0..n.len() - music_ext(n)], a), artist: alloc.String.init(a), album: alloc.String.init(a), ms: 0, cover: NO_IMAGE, tint: alloc.String.from(appkit.avatar_color(n), a) };
         tags(host, path: path.view(), size: e.size, song: &mut song, a: a);
-        if song.artist.len() == 0 {
-            song.artist = alloc.String.from("Unknown artist", a);
-        }
         songs.push(song);
     }
     // By title, as a player lists them.
@@ -930,9 +1068,9 @@ fn time_said(ms: u64, out: &mut alloc.String) {
     out.push_u64(s % 60);
 }
 
-/// "Artist · Album", or the artist alone.
-fn by(song: &Song, a: alloc.Allocator) -> alloc.String {
-    var s = alloc.String.from(song.artist.view(), a);
+/// "Artist · Album", or the artist alone, in lang.
+fn by(song: &Song, lang: u32, a: alloc.Allocator) -> alloc.String {
+    var s = alloc.String.from(artist_of(song, lang: lang), a);
     if song.album.len() > 0 {
         s.push_str(" · ");
         s.push_str(song.album.view());
@@ -968,12 +1106,7 @@ fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
     if not state.made {
         state.made = true;
         var count = alloc.String.init(a);
-        count.push_u64(state.songs.len() as u64);
-        if state.songs.len() == 1 {
-            count.push_str(" song");
-        } else {
-            count.push_str(" songs");
-        }
+        count_said(state.songs.len() as u64, lang: state.lang, out: &mut count);
         dom.set_text(host, item: state.count, text: count.view());
         dom.toggle_class(host, item: state.empty, name: "hidden", on: state.songs.len() > 0);
         var k: usize = 0;
@@ -991,7 +1124,7 @@ fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
             let lines = dom.create_element(host, tag: "div");
             dom.set_attribute(host, item: lines, name: "class", value_: "lines");
             line(host, parent_: lines, class: "primary", text: song.title.view(), a: a);
-            line(host, parent_: lines, class: "secondary", text: by(song, a: a).view(), a: a);
+            line(host, parent_: lines, class: "secondary", text: by(song, lang: state.lang, a: a).view(), a: a);
             dom.append_child(host, parent_: row, child: lines);
             var len = alloc.String.init(a);
             if song.ms > 0 {
@@ -1017,9 +1150,9 @@ fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
             cover_into(host, box: state.mini_cover, song: song, big: false, a: a);
             cover_into(host, box: state.art, song: song, big: true, a: a);
             dom.set_text(host, item: state.mini_title, text: song.title.view());
-            dom.set_text(host, item: state.mini_artist, text: song.artist.view());
+            dom.set_text(host, item: state.mini_artist, text: artist_of(song, lang: state.lang));
             dom.set_text(host, item: state.pname, text: song.title.view());
-            dom.set_text(host, item: state.partist, text: by(song, a: a).view());
+            dom.set_text(host, item: state.partist, text: by(song, lang: state.lang, a: a).view());
         }
         if had == NONE and state.current == NONE {
             return;
@@ -1064,6 +1197,12 @@ fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
     width.push_str("%");
     dom.set_attribute(host, item: state.mini_done, name: "style", value_: width.view());
     dom.set_attribute(host, item: state.fill, name: "style", value_: width.view());
+    var left = alloc.String.from("left: ", a);
+    left.push_u64(part / 10);
+    left.push_str(".");
+    left.push_u64(part % 10);
+    left.push_str("%");
+    dom.set_attribute(host, item: state.knob, name: "style", value_: left.view());
     var at = alloc.String.init(a);
     time_said(pos, out: &mut at);
     dom.set_text(host, item: state.at_time, text: at.view());

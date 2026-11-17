@@ -1,6 +1,10 @@
 name: music
 version: 1
 title: Music
-about: The songs in the phone's Music folder, in Arche
+about: Play the songs on your phone
+title.uz: Musiqa
+about.uz: Telefondagi qoʻshiqlarni tinglash
+title.ru: Музыка
+about.ru: Слушайте песни на телефоне
 publisher: arche
 needs: files
