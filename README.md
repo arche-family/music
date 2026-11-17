@@ -2,13 +2,13 @@
 
 The Arche phone's music player, written in [Arche](https://github.com/arche-family/arche-lang): a WebAssembly component of the Arche phone's world, which the phone has from its first start. That world is Nimadir's mini-app world and what a phone adds to it, here the phone's shared files and its sound; its WIT is in `wit/` (from arche-os's `phone/wit`), and `world` names it. Nimadir's own shell, which has none of it, does not run it.
 
-It works like Android's music players:
+It works like a phone's music player:
 
-- The songs in the phone's shared Music folder (WAV, FLAC, Ogg Vorbis and MP3 files, which the phone decodes), a row each by name; the one that plays is marked.
-- A tap plays a song from its start, in the place of what played.
-- While one plays, its name and Stop are at the bottom. A song played to its end leaves nothing playing.
+- The songs in the phone's shared Music folder (MP3, FLAC, Ogg Vorbis, WAV and AAC in M4A files), a row each by their tags' title, artist and album (ID3v2.2 to 2.4, FLAC's and Vorbis's comments, MP4's), their cover where the tags have one, and their length; the one that plays is marked. Shuffle all.
+- A tap plays a song from its start, the songs after it next. A song played to its end leaves for the next, as Repeat says (all, one, none).
+- While one plays, a bar at the bottom: its cover, name and artist, how far it is, Pause and Next. A tap on it opens the player: the cover large, the song's name and artist, where it is and how long it is on a bar a tap moves along, Previous, Pause and Next, Shuffle and Repeat. The phone's Back closes it.
 
-The phone plays the song, one at a time for the whole phone, and says what plays: a notification's chime pauses it a moment, and a call or an alarm stops it. The app lists the Music folder through the phone world's `files` interface and plays through its `audio` interface (`play`, `stop`, `playing`), which the phone gives an app whose manifest needs `files`. It is an app of the page: its taps come as click events.
+The phone plays the song, one at a time for the whole phone, and says what plays: a notification's chime pauses it a moment, and a call or an alarm stops it. The app lists the Music folder through the phone world's `files` interface and reads a song's tags through `read-part`, and plays through its `audio` interface (`play`, `stop`, `playing`, `pause`, `resume`, `paused`, `position`, `duration`, `seek`), which the phone gives an app whose manifest needs `files`. It is an app of the page: its taps come as click events.
 
 ## Build
 

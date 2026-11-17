@@ -1,197 +1,539 @@
 === headless run: 4 frames ===
 
 --- frame 0  (clicks fed to guest: []) ---
-   [page] 44 nodes
-   #1 body
+   [page] 122 nodes
+   #1 body {back}
      #2 div.app {click}
-       #3 div.content
+       #3 div.list
          #4 div.big
            #5 "Music"
-         #6 div.empty.none.hidden
-           #7 span.icon
-             #8 "library_music"
-           #9 div
-             #10 "No music yet: music files in the Music folder"
-         #11 div.group.rows
-           #18 button.row [data-k="s:Evening.wav"]
-             #19 div.tile [style="background: #f0476a"]
-               #20 span.icon.fill
-                 #21 "music_note"
-             #22 div.lines
-               #23 div.primary.name
-                 #24 "Evening"
-               #25 div.secondary.what
-                 #26 "Tap to play"
-           #27 button.row [data-k="s:Morning.wav"]
-             #28 div.tile [style="background: #f0476a"]
-               #29 span.icon.fill
-                 #30 "music_note"
-             #31 div.lines
-               #32 div.primary.name
-                 #33 "Morning"
-               #34 div.secondary.what
-                 #35 "Tap to play"
-           #36 button.row [data-k="s:Noon.mp3"]
-             #37 div.tile [style="background: #f0476a"]
-               #38 span.icon.fill
-                 #39 "music_note"
-             #40 div.lines
-               #41 div.primary.name
-                 #42 "Noon"
-               #43 div.secondary.what
-                 #44 "Tap to play"
-       #12 div.now.hidden
-         #13 div.playing
-         #14 button.stop [data-k="stop"]
-           #15 span.icon.fill
-             #16 "stop"
-       #17 div.tail
+         #6 div.count
+           #91 "3 songs"
+         #7 div.tools
+           #8 button.shuffle [data-k="shuffle-all"]
+             #9 span.icon
+               #10 "shuffle"
+             #11 span
+               #12 "Shuffle all"
+         #13 div.empty.hidden
+           #14 span.icon
+             #15 "library_music"
+           #16 div
+             #17 "No music yet: songs in the Music folder"
+         #18 div.songs
+           #92 button.song [data-k="s:0"]
+             #93 div.cover [style="background: #f0476a"]
+               #94 span.icon.fill
+                 #95 "music_note"
+             #96 div.lines
+               #97 div.primary
+                 #98 "Evening"
+               #99 div.secondary
+                 #100 "Unknown artist"
+             #101 div.len
+           #102 button.song [data-k="s:1"]
+             #103 div.cover [style="background: #f2994a"]
+               #104 span.icon.fill
+                 #105 "music_note"
+             #106 div.lines
+               #107 div.primary
+                 #108 "Morning"
+               #109 div.secondary
+                 #110 "Unknown artist"
+             #111 div.len
+           #112 button.song [data-k="s:2"]
+             #113 div.cover [style="background: #f2994a"]
+               #114 span.icon.fill
+                 #115 "music_note"
+             #116 div.lines
+               #117 div.primary
+                 #118 "Noon"
+               #119 div.secondary
+                 #120 "Unknown artist"
+             #121 div.len
+               #122 "0:00"
+         #19 div.mini.hidden
+           #20 div.track
+             #21 div.done
+           #22 div.row [data-k="open"]
+             #23 div.cover.minicover
+             #24 div.lines
+               #25 div.primary.minititle
+               #26 div.secondary.miniartist
+             #27 button.iconbtn [data-k="toggle"]
+               #28 span.icon.fill.miniplay
+                 #29 "pause"
+             #30 button.iconbtn [data-k="next"]
+               #31 span.icon.fill
+                 #32 "skip_next"
+       #33 div.player.hidden
+         #34 div.head
+           #35 button.iconbtn [data-k="close"]
+             #36 span.icon
+               #37 "expand_more"
+         #38 div.art
+         #39 div.names
+           #40 div.pname
+           #41 div.partist
+         #42 div.seek
+           #43 div.bar
+             #44 div.fill
+           #45 div.cuts
+             #46 button.cut [data-k="cut:0"]
+             #47 button.cut [data-k="cut:1"]
+             #48 button.cut [data-k="cut:2"]
+             #49 button.cut [data-k="cut:3"]
+             #50 button.cut [data-k="cut:4"]
+             #51 button.cut [data-k="cut:5"]
+             #52 button.cut [data-k="cut:6"]
+             #53 button.cut [data-k="cut:7"]
+             #54 button.cut [data-k="cut:8"]
+             #55 button.cut [data-k="cut:9"]
+             #56 button.cut [data-k="cut:10"]
+             #57 button.cut [data-k="cut:11"]
+             #58 button.cut [data-k="cut:12"]
+             #59 button.cut [data-k="cut:13"]
+             #60 button.cut [data-k="cut:14"]
+             #61 button.cut [data-k="cut:15"]
+             #62 button.cut [data-k="cut:16"]
+             #63 button.cut [data-k="cut:17"]
+             #64 button.cut [data-k="cut:18"]
+             #65 button.cut [data-k="cut:19"]
+             #66 button.cut [data-k="cut:20"]
+             #67 button.cut [data-k="cut:21"]
+             #68 button.cut [data-k="cut:22"]
+             #69 button.cut [data-k="cut:23"]
+         #70 div.times
+           #71 span.attime
+             #72 "0:00"
+           #73 span.alltime
+             #74 "0:00"
+         #75 div.keys
+           #76 button.iconbtn.side.shufflebtn [data-k="shuffle"]
+             #77 span.icon
+               #78 "shuffle"
+           #79 button.iconbtn [data-k="prev"]
+             #80 span.icon.fill
+               #81 "skip_previous"
+           #82 button.play [data-k="toggle"]
+             #83 span.icon.fill.playicon
+               #84 "pause"
+           #85 button.iconbtn [data-k="next"]
+             #86 span.icon.fill
+               #87 "skip_next"
+           #88 button.iconbtn.side.on.repeatbtn [data-k="repeat"]
+             #89 span.icon.repeaticon
+               #90 "repeat"
    [call] arche:phone/audio@0.1.0#playing()
+   [call] arche:phone/audio@0.1.0#position()
 
 --- frame 1  (clicks fed to guest: []) ---
-   [tap] #18
-   [page] 44 nodes
-   #1 body
+   [tap] #102
+   [page] 130 nodes
+   #1 body {back}
      #2 div.app {click}
-       #3 div.content
+       #3 div.list
          #4 div.big
            #5 "Music"
-         #6 div.empty.none.hidden
-           #7 span.icon
-             #8 "library_music"
-           #9 div
-             #10 "No music yet: music files in the Music folder"
-         #11 div.group.rows
-           #18 button.row [data-k="s:Evening.wav"]
-             #19 div.tile [style="background: #f0476a"]
-               #20 span.icon.fill
-                 #21 "music_note"
-             #22 div.lines
-               #23 div.primary.name
-                 #24 "Evening"
-               #25 div.secondary.what
-                 #26 "Tap to play"
-           #27 button.row [data-k="s:Morning.wav"]
-             #28 div.tile [style="background: #f0476a"]
-               #29 span.icon.fill
-                 #30 "music_note"
-             #31 div.lines
-               #32 div.primary.name
-                 #33 "Morning"
-               #34 div.secondary.what
-                 #35 "Tap to play"
-           #36 button.row [data-k="s:Noon.mp3"]
-             #37 div.tile [style="background: #f0476a"]
-               #38 span.icon.fill
-                 #39 "music_note"
-             #40 div.lines
-               #41 div.primary.name
-                 #42 "Noon"
-               #43 div.secondary.what
-                 #44 "Tap to play"
-       #12 div.now.hidden
-         #13 div.playing
-         #14 button.stop [data-k="stop"]
-           #15 span.icon.fill
-             #16 "stop"
-       #17 div.tail
-   [call] arche:phone/audio@0.1.0#play("Music/Evening.wav")
+         #6 div.count
+           #91 "3 songs"
+         #7 div.tools
+           #8 button.shuffle [data-k="shuffle-all"]
+             #9 span.icon
+               #10 "shuffle"
+             #11 span
+               #12 "Shuffle all"
+         #13 div.empty.hidden
+           #14 span.icon
+             #15 "library_music"
+           #16 div
+             #17 "No music yet: songs in the Music folder"
+         #18 div.songs
+           #92 button.song [data-k="s:0"]
+             #93 div.cover [style="background: #f0476a"]
+               #94 span.icon.fill
+                 #95 "music_note"
+             #96 div.lines
+               #97 div.primary
+                 #98 "Evening"
+               #99 div.secondary
+                 #100 "Unknown artist"
+             #101 div.len
+           #102 button.song.on [data-k="s:1"]
+             #103 div.cover [style="background: #f2994a"]
+               #104 span.icon.fill
+                 #105 "music_note"
+             #106 div.lines
+               #107 div.primary
+                 #108 "Morning"
+               #109 div.secondary
+                 #110 "Unknown artist"
+             #111 div.len
+           #112 button.song [data-k="s:2"]
+             #113 div.cover [style="background: #f2994a"]
+               #114 span.icon.fill
+                 #115 "music_note"
+             #116 div.lines
+               #117 div.primary
+                 #118 "Noon"
+               #119 div.secondary
+                 #120 "Unknown artist"
+             #121 div.len
+               #122 "0:00"
+         #19 div.mini.hidden
+           #20 div.track
+             #21 div.done
+           #22 div.row [data-k="open"]
+             #23 div.cover.minicover [style="background: #f2994a"]
+               #123 span.icon.fill
+                 #124 "music_note"
+             #24 div.lines
+               #25 div.primary.minititle
+                 #127 "Morning"
+               #26 div.secondary.miniartist
+                 #128 "Unknown artist"
+             #27 button.iconbtn [data-k="toggle"]
+               #28 span.icon.fill.miniplay
+                 #29 "pause"
+             #30 button.iconbtn [data-k="next"]
+               #31 span.icon.fill
+                 #32 "skip_next"
+       #33 div.player.hidden
+         #34 div.head
+           #35 button.iconbtn [data-k="close"]
+             #36 span.icon
+               #37 "expand_more"
+         #38 div.art [style="background: #f2994a"]
+           #125 span.icon.fill
+             #126 "music_note"
+         #39 div.names
+           #40 div.pname
+             #129 "Morning"
+           #41 div.partist
+             #130 "Unknown artist"
+         #42 div.seek
+           #43 div.bar
+             #44 div.fill
+           #45 div.cuts
+             #46 button.cut [data-k="cut:0"]
+             #47 button.cut [data-k="cut:1"]
+             #48 button.cut [data-k="cut:2"]
+             #49 button.cut [data-k="cut:3"]
+             #50 button.cut [data-k="cut:4"]
+             #51 button.cut [data-k="cut:5"]
+             #52 button.cut [data-k="cut:6"]
+             #53 button.cut [data-k="cut:7"]
+             #54 button.cut [data-k="cut:8"]
+             #55 button.cut [data-k="cut:9"]
+             #56 button.cut [data-k="cut:10"]
+             #57 button.cut [data-k="cut:11"]
+             #58 button.cut [data-k="cut:12"]
+             #59 button.cut [data-k="cut:13"]
+             #60 button.cut [data-k="cut:14"]
+             #61 button.cut [data-k="cut:15"]
+             #62 button.cut [data-k="cut:16"]
+             #63 button.cut [data-k="cut:17"]
+             #64 button.cut [data-k="cut:18"]
+             #65 button.cut [data-k="cut:19"]
+             #66 button.cut [data-k="cut:20"]
+             #67 button.cut [data-k="cut:21"]
+             #68 button.cut [data-k="cut:22"]
+             #69 button.cut [data-k="cut:23"]
+         #70 div.times
+           #71 span.attime
+             #72 "0:00"
+           #73 span.alltime
+             #74 "0:00"
+         #75 div.keys
+           #76 button.iconbtn.side.shufflebtn [data-k="shuffle"]
+             #77 span.icon
+               #78 "shuffle"
+           #79 button.iconbtn [data-k="prev"]
+             #80 span.icon.fill
+               #81 "skip_previous"
+           #82 button.play [data-k="toggle"]
+             #83 span.icon.fill.playicon
+               #84 "pause"
+           #85 button.iconbtn [data-k="next"]
+             #86 span.icon.fill
+               #87 "skip_next"
+           #88 button.iconbtn.side.on.repeatbtn [data-k="repeat"]
+             #89 span.icon.repeaticon
+               #90 "repeat"
+   [call] arche:phone/audio@0.1.0#play("Music/Morning.wav")
    [call] arche:phone/audio@0.1.0#playing()
+   [call] arche:phone/audio@0.1.0#position()
 
 --- frame 2  (clicks fed to guest: []) ---
-   [tap] #14
-   [page] 44 nodes
-   #1 body
+   [tap] #8
+   [page] 130 nodes
+   #1 body {back}
      #2 div.app {click}
-       #3 div.content
+       #3 div.list
          #4 div.big
            #5 "Music"
-         #6 div.empty.none.hidden
-           #7 span.icon
-             #8 "library_music"
-           #9 div
-             #10 "No music yet: music files in the Music folder"
-         #11 div.group.rows
-           #18 button.row [data-k="s:Evening.wav"]
-             #19 div.tile [style="background: #f0476a"]
-               #20 span.icon.fill
-                 #21 "music_note"
-             #22 div.lines
-               #23 div.primary.name
-                 #24 "Evening"
-               #25 div.secondary.what
-                 #26 "Tap to play"
-           #27 button.row [data-k="s:Morning.wav"]
-             #28 div.tile [style="background: #f0476a"]
-               #29 span.icon.fill
-                 #30 "music_note"
-             #31 div.lines
-               #32 div.primary.name
-                 #33 "Morning"
-               #34 div.secondary.what
-                 #35 "Tap to play"
-           #36 button.row [data-k="s:Noon.mp3"]
-             #37 div.tile [style="background: #f0476a"]
-               #38 span.icon.fill
-                 #39 "music_note"
-             #40 div.lines
-               #41 div.primary.name
-                 #42 "Noon"
-               #43 div.secondary.what
-                 #44 "Tap to play"
-       #12 div.now.hidden
-         #13 div.playing
-         #14 button.stop [data-k="stop"]
-           #15 span.icon.fill
-             #16 "stop"
-       #17 div.tail
-   [call] arche:phone/audio@0.1.0#stop()
+         #6 div.count
+           #91 "3 songs"
+         #7 div.tools
+           #8 button.shuffle [data-k="shuffle-all"]
+             #9 span.icon
+               #10 "shuffle"
+             #11 span
+               #12 "Shuffle all"
+         #13 div.empty.hidden
+           #14 span.icon
+             #15 "library_music"
+           #16 div
+             #17 "No music yet: songs in the Music folder"
+         #18 div.songs
+           #92 button.song [data-k="s:0"]
+             #93 div.cover [style="background: #f0476a"]
+               #94 span.icon.fill
+                 #95 "music_note"
+             #96 div.lines
+               #97 div.primary
+                 #98 "Evening"
+               #99 div.secondary
+                 #100 "Unknown artist"
+             #101 div.len
+           #102 button.song.on [data-k="s:1"]
+             #103 div.cover [style="background: #f2994a"]
+               #104 span.icon.fill
+                 #105 "music_note"
+             #106 div.lines
+               #107 div.primary
+                 #108 "Morning"
+               #109 div.secondary
+                 #110 "Unknown artist"
+             #111 div.len
+           #112 button.song [data-k="s:2"]
+             #113 div.cover [style="background: #f2994a"]
+               #114 span.icon.fill
+                 #115 "music_note"
+             #116 div.lines
+               #117 div.primary
+                 #118 "Noon"
+               #119 div.secondary
+                 #120 "Unknown artist"
+             #121 div.len
+               #122 "0:00"
+         #19 div.mini.hidden
+           #20 div.track
+             #21 div.done
+           #22 div.row [data-k="open"]
+             #23 div.cover.minicover [style="background: #f2994a"]
+               #123 span.icon.fill
+                 #124 "music_note"
+             #24 div.lines
+               #25 div.primary.minititle
+                 #127 "Morning"
+               #26 div.secondary.miniartist
+                 #128 "Unknown artist"
+             #27 button.iconbtn [data-k="toggle"]
+               #28 span.icon.fill.miniplay
+                 #29 "pause"
+             #30 button.iconbtn [data-k="next"]
+               #31 span.icon.fill
+                 #32 "skip_next"
+       #33 div.player.hidden
+         #34 div.head
+           #35 button.iconbtn [data-k="close"]
+             #36 span.icon
+               #37 "expand_more"
+         #38 div.art [style="background: #f2994a"]
+           #125 span.icon.fill
+             #126 "music_note"
+         #39 div.names
+           #40 div.pname
+             #129 "Morning"
+           #41 div.partist
+             #130 "Unknown artist"
+         #42 div.seek
+           #43 div.bar
+             #44 div.fill
+           #45 div.cuts
+             #46 button.cut [data-k="cut:0"]
+             #47 button.cut [data-k="cut:1"]
+             #48 button.cut [data-k="cut:2"]
+             #49 button.cut [data-k="cut:3"]
+             #50 button.cut [data-k="cut:4"]
+             #51 button.cut [data-k="cut:5"]
+             #52 button.cut [data-k="cut:6"]
+             #53 button.cut [data-k="cut:7"]
+             #54 button.cut [data-k="cut:8"]
+             #55 button.cut [data-k="cut:9"]
+             #56 button.cut [data-k="cut:10"]
+             #57 button.cut [data-k="cut:11"]
+             #58 button.cut [data-k="cut:12"]
+             #59 button.cut [data-k="cut:13"]
+             #60 button.cut [data-k="cut:14"]
+             #61 button.cut [data-k="cut:15"]
+             #62 button.cut [data-k="cut:16"]
+             #63 button.cut [data-k="cut:17"]
+             #64 button.cut [data-k="cut:18"]
+             #65 button.cut [data-k="cut:19"]
+             #66 button.cut [data-k="cut:20"]
+             #67 button.cut [data-k="cut:21"]
+             #68 button.cut [data-k="cut:22"]
+             #69 button.cut [data-k="cut:23"]
+         #70 div.times
+           #71 span.attime
+             #72 "0:00"
+           #73 span.alltime
+             #74 "0:00"
+         #75 div.keys
+           #76 button.iconbtn.side.shufflebtn [data-k="shuffle"]
+             #77 span.icon
+               #78 "shuffle"
+           #79 button.iconbtn [data-k="prev"]
+             #80 span.icon.fill
+               #81 "skip_previous"
+           #82 button.play [data-k="toggle"]
+             #83 span.icon.fill.playicon
+               #84 "pause"
+           #85 button.iconbtn [data-k="next"]
+             #86 span.icon.fill
+               #87 "skip_next"
+           #88 button.iconbtn.side.on.repeatbtn [data-k="repeat"]
+             #89 span.icon.repeaticon
+               #90 "repeat"
+   [call] arche:phone/audio@0.1.0#play("Music/Morning.wav")
    [call] arche:phone/audio@0.1.0#playing()
+   [call] arche:phone/audio@0.1.0#position()
 
 --- frame 3  (clicks fed to guest: []) ---
-   [page] 44 nodes
-   #1 body
+   [tap] #92
+   [page] 130 nodes
+   #1 body {back}
      #2 div.app {click}
-       #3 div.content
+       #3 div.list
          #4 div.big
            #5 "Music"
-         #6 div.empty.none.hidden
-           #7 span.icon
-             #8 "library_music"
-           #9 div
-             #10 "No music yet: music files in the Music folder"
-         #11 div.group.rows
-           #18 button.row [data-k="s:Evening.wav"]
-             #19 div.tile [style="background: #f0476a"]
-               #20 span.icon.fill
-                 #21 "music_note"
-             #22 div.lines
-               #23 div.primary.name
-                 #24 "Evening"
-               #25 div.secondary.what
-                 #26 "Tap to play"
-           #27 button.row [data-k="s:Morning.wav"]
-             #28 div.tile [style="background: #f0476a"]
-               #29 span.icon.fill
-                 #30 "music_note"
-             #31 div.lines
-               #32 div.primary.name
-                 #33 "Morning"
-               #34 div.secondary.what
-                 #35 "Tap to play"
-           #36 button.row [data-k="s:Noon.mp3"]
-             #37 div.tile [style="background: #f0476a"]
-               #38 span.icon.fill
-                 #39 "music_note"
-             #40 div.lines
-               #41 div.primary.name
-                 #42 "Noon"
-               #43 div.secondary.what
-                 #44 "Tap to play"
-       #12 div.now.hidden
-         #13 div.playing
-         #14 button.stop [data-k="stop"]
-           #15 span.icon.fill
-             #16 "stop"
-       #17 div.tail
+         #6 div.count
+           #91 "3 songs"
+         #7 div.tools
+           #8 button.shuffle [data-k="shuffle-all"]
+             #9 span.icon
+               #10 "shuffle"
+             #11 span
+               #12 "Shuffle all"
+         #13 div.empty.hidden
+           #14 span.icon
+             #15 "library_music"
+           #16 div
+             #17 "No music yet: songs in the Music folder"
+         #18 div.songs
+           #92 button.song.on [data-k="s:0"]
+             #93 div.cover [style="background: #f0476a"]
+               #94 span.icon.fill
+                 #95 "music_note"
+             #96 div.lines
+               #97 div.primary
+                 #98 "Evening"
+               #99 div.secondary
+                 #100 "Unknown artist"
+             #101 div.len
+           #102 button.song [data-k="s:1"]
+             #103 div.cover [style="background: #f2994a"]
+               #104 span.icon.fill
+                 #105 "music_note"
+             #106 div.lines
+               #107 div.primary
+                 #108 "Morning"
+               #109 div.secondary
+                 #110 "Unknown artist"
+             #111 div.len
+           #112 button.song [data-k="s:2"]
+             #113 div.cover [style="background: #f2994a"]
+               #114 span.icon.fill
+                 #115 "music_note"
+             #116 div.lines
+               #117 div.primary
+                 #118 "Noon"
+               #119 div.secondary
+                 #120 "Unknown artist"
+             #121 div.len
+               #122 "0:00"
+         #19 div.mini.hidden
+           #20 div.track
+             #21 div.done
+           #22 div.row [data-k="open"]
+             #23 div.cover.minicover [style="background: #f0476a"]
+               #131 span.icon.fill
+                 #132 "music_note"
+             #24 div.lines
+               #25 div.primary.minititle
+                 #135 "Evening"
+               #26 div.secondary.miniartist
+                 #136 "Unknown artist"
+             #27 button.iconbtn [data-k="toggle"]
+               #28 span.icon.fill.miniplay
+                 #29 "pause"
+             #30 button.iconbtn [data-k="next"]
+               #31 span.icon.fill
+                 #32 "skip_next"
+       #33 div.player.hidden
+         #34 div.head
+           #35 button.iconbtn [data-k="close"]
+             #36 span.icon
+               #37 "expand_more"
+         #38 div.art [style="background: #f0476a"]
+           #133 span.icon.fill
+             #134 "music_note"
+         #39 div.names
+           #40 div.pname
+             #137 "Evening"
+           #41 div.partist
+             #138 "Unknown artist"
+         #42 div.seek
+           #43 div.bar
+             #44 div.fill
+           #45 div.cuts
+             #46 button.cut [data-k="cut:0"]
+             #47 button.cut [data-k="cut:1"]
+             #48 button.cut [data-k="cut:2"]
+             #49 button.cut [data-k="cut:3"]
+             #50 button.cut [data-k="cut:4"]
+             #51 button.cut [data-k="cut:5"]
+             #52 button.cut [data-k="cut:6"]
+             #53 button.cut [data-k="cut:7"]
+             #54 button.cut [data-k="cut:8"]
+             #55 button.cut [data-k="cut:9"]
+             #56 button.cut [data-k="cut:10"]
+             #57 button.cut [data-k="cut:11"]
+             #58 button.cut [data-k="cut:12"]
+             #59 button.cut [data-k="cut:13"]
+             #60 button.cut [data-k="cut:14"]
+             #61 button.cut [data-k="cut:15"]
+             #62 button.cut [data-k="cut:16"]
+             #63 button.cut [data-k="cut:17"]
+             #64 button.cut [data-k="cut:18"]
+             #65 button.cut [data-k="cut:19"]
+             #66 button.cut [data-k="cut:20"]
+             #67 button.cut [data-k="cut:21"]
+             #68 button.cut [data-k="cut:22"]
+             #69 button.cut [data-k="cut:23"]
+         #70 div.times
+           #71 span.attime
+             #72 "0:00"
+           #73 span.alltime
+             #74 "0:00"
+         #75 div.keys
+           #76 button.iconbtn.side.shufflebtn [data-k="shuffle"]
+             #77 span.icon
+               #78 "shuffle"
+           #79 button.iconbtn [data-k="prev"]
+             #80 span.icon.fill
+               #81 "skip_previous"
+           #82 button.play [data-k="toggle"]
+             #83 span.icon.fill.playicon
+               #84 "pause"
+           #85 button.iconbtn [data-k="next"]
+             #86 span.icon.fill
+               #87 "skip_next"
+           #88 button.iconbtn.side.on.repeatbtn [data-k="repeat"]
+             #89 span.icon.repeaticon
+               #90 "repeat"
+   [call] arche:phone/audio@0.1.0#play("Music/Evening.wav")
    [call] arche:phone/audio@0.1.0#playing()
+   [call] arche:phone/audio@0.1.0#position()

@@ -1,14 +1,21 @@
-/// Music, the Arche phone's, written in Arche, as Android's music players
-/// are: the songs in the phone's shared Music folder (WAV, FLAC, Ogg Vorbis and MP3 files), a row
-/// each, the one that plays marked; a tap plays a song, from its start, in
-/// the place of what played; and, while one plays, its name and Stop at
-/// the bottom. The phone plays it, one song at a time for the whole phone,
-/// and says what plays; a song played to its end leaves nothing playing.
-/// An app of the page: its taps come as click events.
+/// Music, the Arche phone's, written in Arche, as a phone's player is
+/// (arche-os T7, T12): the songs of the phone's shared Music folder (MP3,
+/// FLAC, Ogg Vorbis, WAV and AAC in M4A), a row each, by their tags'
+/// title, artist and album (ID3v2's, FLAC's and Vorbis's comments, MP4's)
+/// and their length, the one playing marked; Shuffle all. A tap plays a
+/// song, the rest of the list after it. While one plays, a bar at the
+/// bottom: its cover, its name and artist, how far it is, Pause and Next;
+/// a tap on it opens the player: the cover large, the song's name and
+/// artist, where it is and how long it is on a bar a tap moves along,
+/// Previous, Pause and Next, Shuffle and Repeat (all, one, none). A song
+/// played to its end leaves for the next, as Repeat says. The phone's
+/// Back closes the player. An app of the page: its taps come as click
+/// events.
 ///
 /// An app of the phone's world (arche:phone, wit/): it lists the Music
-/// folder through files, and plays through audio (its manifest's needs:
-/// files).
+/// folder and reads a song's tags (its first bytes, and an MP4's last)
+/// through files, and plays, pauses and moves through audio, the phone
+/// playing one song at a time for the whole phone and saying where it is.
 import alloc;
 import appkit;
 import audio;
@@ -17,20 +24,75 @@ import files;
 import host_api;
 import std;
 
-const SHEET: str = ".rows.hidden, .none.hidden, .now.hidden { display: none; } button.row.on .primary { color: var(--kit-accent); } .now { display: flex; flex-direction: row; align-items: center; gap: 12px; margin: 0 14px; padding: 12px 12px 12px 18px; border-radius: 22px; background: var(--kit-card); } .playing { font-size: 16px; font-weight: 500; color: var(--kit-text); flex-grow: 1; } button.stop { width: 46px; height: 46px; border-radius: 23px; border: 0; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--kit-accent); color: #ffffff; } .hidden { display: none; }";
+const SHEET: str = ".count { font-size: 14px; color: var(--kit-muted); padding: 0 24px 8px; margin-top: -10px; } .tools { display: flex; flex-direction: row; padding: 4px 16px 10px; } .shuffle { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 0 18px 0 14px; height: 40px; border-radius: 20px; border: 0; background: var(--kit-accent); color: #ffffff; font-size: 15px; font-weight: 500; } .songs { display: flex; flex-direction: column; padding-bottom: 96px; } button.song { display: flex; flex-direction: row; align-items: center; gap: 14px; width: 100%; box-sizing: border-box; padding: 8px 20px; font-weight: 400; border: 0; border-radius: 0; background: transparent; text-align: left; color: var(--kit-text); } .cover { width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #ffffff; overflow: hidden; } .cover img { width: 52px; height: 52px; object-fit: cover; } .song .lines { gap: 3px; } .song .primary { font-size: 16px; } .song.on .primary { color: var(--kit-accent); font-weight: 500; } .len { font-size: 13px; color: var(--kit-muted); flex-shrink: 0; } .mini { position: fixed; left: 8px; right: 8px; bottom: 8px; display: flex; flex-direction: column; border-radius: 20px; background: var(--kit-card); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16); overflow: hidden; } .mini .row { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 8px 8px 8px 10px; min-height: 0; } .mini .cover { width: 44px; height: 44px; border-radius: 10px; } .mini .cover img { width: 44px; height: 44px; } .mini .lines { flex-grow: 1; min-width: 0; } .mini .primary { font-size: 15px; font-weight: 500; } .track { height: 3px; background: var(--kit-line); } .done { height: 3px; background: var(--kit-accent); } .player { display: flex; flex-direction: column; min-height: 100vh; } .player .head { padding-left: 8px; } .art { align-self: center; width: 300px; height: 300px; border-radius: 24px; margin: 16px 0 28px; display: flex; align-items: center; justify-content: center; color: #ffffff; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); } .art img { width: 300px; height: 300px; object-fit: cover; } .art .icon { font-size: 120px; } .names { display: flex; flex-direction: column; gap: 4px; padding: 0 30px; } .pname { font-size: 22px; font-weight: 600; color: var(--kit-text); } .partist { font-size: 16px; color: var(--kit-muted); } .seek { position: relative; margin: 32px 30px 0; height: 4px; } .seek .bar { height: 4px; border-radius: 2px; background: var(--kit-line); overflow: hidden; } .seek .fill { height: 4px; background: var(--kit-accent); } .cuts { position: absolute; left: 0; right: 0; top: -12px; height: 28px; display: flex; flex-direction: row; } button.cut { flex-grow: 1; height: 28px; padding: 0; border: 0; border-radius: 0; background: transparent; } .times { display: flex; flex-direction: row; justify-content: space-between; padding: 10px 30px 0; font-size: 12px; color: var(--kit-muted); } .keys { display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 18px 22px 0; } .keys .iconbtn .icon { font-size: 30px; } .keys .side .icon { font-size: 24px; color: var(--kit-muted); } .keys .side.on .icon { color: var(--kit-accent); } .big { } button.play { width: 72px; height: 72px; border-radius: 36px; border: 0; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--kit-accent); color: #ffffff; } button.play .icon { font-size: 40px; } .hidden { display: none; }";
 
 const FOLDER: str = "Music";
 
+/// The cuts of the seek bar: a tap on one moves the song there.
+const CUTS: u32 = 24;
+
+/// No song.
+const NONE: usize = 0xFFFFFFFF;
+/// The shell's number for no image.
+const NO_IMAGE: u32 = 0xFFFFFFFF;
+
+/// What Repeat says.
+const REPEAT_ALL: u32 = 0;
+const REPEAT_ONE: u32 = 1;
+const REPEAT_OFF: u32 = 2;
+
+/// A song: its file's name, its tags' title, artist and album (its file's
+/// name, Unknown artist, nothing, where they say none), its length in ms
+/// (0 unknown), its cover's image (NO_IMAGE for none) and its color.
+type Song = struct {
+    name: alloc.String,
+    title: alloc.String,
+    artist: alloc.String,
+    album: alloc.String,
+    ms: u64,
+    cover: u32,
+    tint: alloc.String,
+}
+
 type Music = struct {
-    /// What the page shows playing: a path, "" for nothing; and whether the
-    /// rows have been made once.
-    shown: alloc.String,
+    songs: alloc.List(Song),
+    /// The song played (its place; NONE for none), whether the app asked
+    /// the phone to stop, the order songs come in (places), Shuffle and
+    /// Repeat, and whether the player is open.
+    current: usize,
+    order: alloc.List(usize),
+    shuffle: bool,
+    repeat: u32,
+    open: bool,
+    /// What the phone said last: what plays, and where it was, in ms.
+    playing: alloc.String,
+    last_pos: u64,
+    /// The rows made once, marked as what plays changes.
     made: bool,
+    marked: usize,
+    seed: u64,
     /// The page's nodes.
+    list: u32,
+    count: u32,
     rows: u32,
     empty: u32,
-    now: u32,
-    playing: u32,
+    mini: u32,
+    mini_cover: u32,
+    mini_title: u32,
+    mini_artist: u32,
+    mini_done: u32,
+    mini_play: u32,
+    player: u32,
+    art: u32,
+    pname: u32,
+    partist: u32,
+    fill: u32,
+    at_time: u32,
+    all_time: u32,
+    play_icon: u32,
+    shuffle_btn: u32,
+    repeat_btn: u32,
+    repeat_icon: u32,
 }
 
 fn init(host: &mut std.Host, a: alloc.Allocator) -> Music {
@@ -38,44 +100,262 @@ fn init(host: &mut std.Host, a: alloc.Allocator) -> Music {
     _ = dom.add_stylesheet(host, css: kit.view());
     _ = dom.add_stylesheet(host, css: SHEET);
     let root = dom.root(host);
-    let markup = "<div class='app'><div class='content'><div class='big'>Music</div><div class='empty none hidden'><span class='icon'>library_music</span><div>No music yet: music files in the Music folder</div></div><div class='group rows'></div></div><div class='now hidden'><div class='playing'></div><button class='stop' data-k='stop'><span class='icon fill'>stop</span></button></div><div class='tail'></div></div>";
+    var m = alloc.String.from("<div class='app'><div class='list'><div class='big'>Music</div><div class='count'></div><div class='tools'><button class='shuffle' data-k='shuffle-all'><span class='icon'>shuffle</span><span>Shuffle all</span></button></div><div class='empty hidden'><span class='icon'>library_music</span><div>No music yet: songs in the Music folder</div></div><div class='songs'></div>", a);
+    m.push_str("<div class='mini hidden'><div class='track'><div class='done'></div></div><div class='row' data-k='open'><div class='cover minicover'></div><div class='lines'><div class='primary minititle'></div><div class='secondary miniartist'></div></div><button class='iconbtn' data-k='toggle'><span class='icon fill miniplay'>pause</span></button><button class='iconbtn' data-k='next'><span class='icon fill'>skip_next</span></button></div></div></div>");
+    m.push_str("<div class='player hidden'><div class='head'><button class='iconbtn' data-k='close'><span class='icon'>expand_more</span></button></div><div class='art'></div><div class='names'><div class='pname'></div><div class='partist'></div></div><div class='seek'><div class='bar'><div class='fill'></div></div><div class='cuts'>");
+    var k: u32 = 0;
+    while k < CUTS : (k += 1) {
+        m.push_str("<button class='cut' data-k='cut:");
+        m.push_u64(k as u64);
+        m.push_str("'></button>");
+    }
+    m.push_str("</div></div><div class='times'><span class='attime'>0:00</span><span class='alltime'>0:00</span></div><div class='keys'><button class='iconbtn side shufflebtn' data-k='shuffle'><span class='icon'>shuffle</span></button><button class='iconbtn' data-k='prev'><span class='icon fill'>skip_previous</span></button><button class='play' data-k='toggle'><span class='icon fill playicon'>pause</span></button><button class='iconbtn' data-k='next'><span class='icon fill'>skip_next</span></button><button class='iconbtn side on repeatbtn' data-k='repeat'><span class='icon repeaticon'>repeat</span></button></div></div></div>");
     var why = alloc.String.init(a);
-    if not dom.set_markup(host, item: root, markup: markup, why: &mut why, a: a) {
+    if not dom.set_markup(host, item: root, markup: m.view(), why: &mut why, a: a) {
         host_api.log(host, msg: why.view());
     }
     let app = first(host, selector: ".app", a: a);
     dom.listen(host, item: app, kind: "click");
-    return Music { shown: alloc.String.init(a), made: false, rows: first(host, selector: ".rows", a: a), empty: first(host, selector: ".none", a: a), now: first(host, selector: ".now", a: a), playing: first(host, selector: ".playing", a: a) };
+    dom.listen(host, item: root, kind: "back");
+    var state = Music {
+        songs: alloc.List(Song).init(a),
+        current: NONE,
+        order: alloc.List(usize).init(a),
+        shuffle: false,
+        repeat: REPEAT_ALL,
+        open: false,
+        playing: alloc.String.init(a),
+        last_pos: 0,
+        made: false,
+        marked: NONE,
+        seed: (host_api.now_millis(host) as u64) | 1,
+        list: first(host, selector: ".list", a: a),
+        count: first(host, selector: ".count", a: a),
+        rows: first(host, selector: ".songs", a: a),
+        empty: first(host, selector: ".empty", a: a),
+        mini: first(host, selector: ".mini", a: a),
+        mini_cover: first(host, selector: ".minicover", a: a),
+        mini_title: first(host, selector: ".minititle", a: a),
+        mini_artist: first(host, selector: ".miniartist", a: a),
+        mini_done: first(host, selector: ".done", a: a),
+        mini_play: first(host, selector: ".miniplay", a: a),
+        player: first(host, selector: ".player", a: a),
+        art: first(host, selector: ".art", a: a),
+        pname: first(host, selector: ".pname", a: a),
+        partist: first(host, selector: ".partist", a: a),
+        fill: first(host, selector: ".fill", a: a),
+        at_time: first(host, selector: ".attime", a: a),
+        all_time: first(host, selector: ".alltime", a: a),
+        play_icon: first(host, selector: ".playicon", a: a),
+        shuffle_btn: first(host, selector: ".shufflebtn", a: a),
+        repeat_btn: first(host, selector: ".repeatbtn", a: a),
+        repeat_icon: first(host, selector: ".repeaticon", a: a),
+    };
+    load(&mut state, host: host, a: a);
+    return state;
 }
 
 fn update(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
     for e in dom.events(host, a: a).items() {
-        if e.kind.view().eq("click") {
+        if e.kind.view().eq("back") {
+            press(state, host: host, k: "close", a: a);
+        } else if e.kind.view().eq("click") {
             match key_of(host, n: e.target, a: a) {
-                some(k) => {
-                    if k.view().eq("stop") {
-                        audio.stop(host);
-                    } else if k.view().starts_with("s:") {
-                        var path = alloc.String.from(FOLDER, a);
-                        path.push_str("/");
-                        path.push_str(k.view()[2..k.len()]);
-                        _ = audio.play(host, path: path.view());
-                    }
-                }
+                some(k) => { press(state, host: host, k: k.view(), a: a); }
                 none => { }
             }
         }
     }
+    // What the phone plays now; a song played to its end leaves for the
+    // next one.
     var now = alloc.String.init(a);
     match audio.playing(host, a: a) {
         some(p) => { now = p; }
         none => { }
     }
-    if not state.made or not now.view().eq(state.shown.view()) {
-        state.made = true;
-        state.shown = alloc.String.from(now.view(), a);
-        show(state, host: host, a: a);
+    let pos = audio.position(host) as u64;
+    if now.len() == 0 and state.playing.len() > 0 and state.current != NONE {
+        let ms = song_ms(state, host: host);
+        if ms > 0 and state.last_pos + 2500 >= ms {
+            advance(state, host: host, forward: true, ended: true, a: a);
+        }
     }
+    if not now.view().eq(state.playing.view()) {
+        state.playing = alloc.String.from(now.view(), a);
+        state.current = song_of(state, path: now.view());
+    }
+    if now.len() > 0 {
+        state.last_pos = pos;
+    }
+    show(state, host: host, a: a);
+    if now.len() > 0 and not audio.paused(host) {
+        host_api.request_frame(host, after_ms: 250);
+    }
+}
+
+/// The song at path in the shared files; NONE for none of the list's.
+fn song_of(state: &Music, path: str) -> usize {
+    let f = FOLDER.len();
+    if path.len() <= f + 1 or not path.starts_with(FOLDER) or path.bytes()[f] != '/' {
+        return NONE;
+    }
+    let name = path[f + 1..path.len()];
+    var k: usize = 0;
+    while k < state.songs.len() : (k += 1) {
+        if state.songs.items()[k].name.view().eq(name) {
+            return k;
+        }
+    }
+    return NONE;
+}
+
+/// How long what plays is, in ms: the phone's word, or else its tags'.
+fn song_ms(state: &Music, host: &mut std.Host) -> u64 {
+    let d = audio.duration(host) as u64;
+    if d > 0 {
+        return d;
+    }
+    if state.current != NONE {
+        return state.songs.items()[state.current].ms;
+    }
+    return 0;
+}
+
+/// Song k played, from its start.
+fn play(state: &mut Music, host: &mut std.Host, k: usize, a: alloc.Allocator) {
+    if k >= state.songs.len() {
+        return;
+    }
+    var path = alloc.String.from(FOLDER, a);
+    path.push_str("/");
+    path.push_str(state.songs.items()[k].name.view());
+    _ = audio.play(host, path: path.view());
+    state.current = k;
+    state.last_pos = 0;
+}
+
+/// The next song (forward) or the one before, in the order songs come,
+/// as Repeat says; one that ended (ended) again when Repeat is one.
+fn advance(state: &mut Music, host: &mut std.Host, forward: bool, ended: bool, a: alloc.Allocator) {
+    if state.order.len() == 0 or state.current == NONE {
+        return;
+    }
+    if ended and state.repeat == REPEAT_ONE {
+        play(state, host: host, k: state.current, a: a);
+        return;
+    }
+    var at: usize = 0;
+    while at < state.order.len() and state.order.items()[at] != state.current : (at += 1) {
+    }
+    if at >= state.order.len() {
+        at = 0;
+    }
+    if forward {
+        if at + 1 < state.order.len() {
+            play(state, host: host, k: state.order.items()[at + 1], a: a);
+        } else if state.repeat != REPEAT_OFF or not ended {
+            play(state, host: host, k: state.order.items()[0], a: a);
+        }
+    } else {
+        // Back: to its start when it is past three seconds, as a player's.
+        if audio.position(host) > 3000 or at == 0 {
+            play(state, host: host, k: state.current, a: a);
+        } else {
+            play(state, host: host, k: state.order.items()[at - 1], a: a);
+        }
+    }
+}
+
+/// The order songs come in: the list's, or shuffled, k first.
+fn order_from(state: &mut Music, k: usize, a: alloc.Allocator) {
+    var order = alloc.List(usize).init(a);
+    var i: usize = 0;
+    while i < state.songs.len() : (i += 1) {
+        order.push(i);
+    }
+    if state.shuffle {
+        // Fisher and Yates, by a xorshift of the time.
+        var j = order.len();
+        while j > 1 {
+            j -= 1;
+            state.seed = state.seed ^ (state.seed << 13);
+            state.seed = state.seed ^ (state.seed >> 7);
+            state.seed = state.seed ^ (state.seed << 17);
+            let r = (state.seed % ((j + 1) as u64)) as usize;
+            let t = order.items()[j];
+            let u = order.items()[r];
+            order.items_mut()[j] = u;
+            order.items_mut()[r] = t;
+        }
+        // k first.
+        var at: usize = 0;
+        while at < order.len() and order.items()[at] != k : (at += 1) {
+        }
+        if at < order.len() {
+            let t = order.items()[0];
+            order.items_mut()[0] = k;
+            order.items_mut()[at] = t;
+        }
+    }
+    state.order = order;
+}
+
+fn press(state: &mut Music, host: &mut std.Host, k: str, a: alloc.Allocator) {
+    if k.starts_with("s:") {
+        let i = number(k[2..k.len()]) as usize;
+        order_from(state, k: i, a: a);
+        play(state, host: host, k: i, a: a);
+    } else if k.eq("shuffle-all") {
+        if state.songs.len() > 0 {
+            state.shuffle = true;
+            state.seed = state.seed ^ (host_api.now_millis(host) as u64);
+            order_from(state, k: (state.seed % (state.songs.len() as u64)) as usize, a: a);
+            play(state, host: host, k: state.order.items()[0], a: a);
+        }
+    } else if k.eq("toggle") {
+        if state.playing.len() == 0 {
+            if state.current != NONE {
+                play(state, host: host, k: state.current, a: a);
+            }
+        } else if audio.paused(host) {
+            audio.resume(host);
+        } else {
+            audio.pause(host);
+        }
+    } else if k.eq("next") {
+        advance(state, host: host, forward: true, ended: false, a: a);
+    } else if k.eq("prev") {
+        advance(state, host: host, forward: false, ended: false, a: a);
+    } else if k.eq("open") {
+        state.open = true;
+    } else if k.eq("close") {
+        state.open = false;
+    } else if k.eq("shuffle") {
+        state.shuffle = not state.shuffle;
+        if state.current != NONE {
+            order_from(state, k: state.current, a: a);
+        }
+    } else if k.eq("repeat") {
+        state.repeat = (state.repeat + 1) % 3;
+    } else if k.starts_with("cut:") {
+        let c = number(k[4..k.len()]) as u64;
+        let ms = song_ms(state, host: host);
+        if ms > 0 {
+            audio.seek(host, ms: ((ms * c + ms / 2) / (CUTS as u64)) as u32);
+        }
+    }
+}
+
+/// The length of name's extension when it is a song's the phone plays,
+/// with its dot; 0 for another.
+fn music_ext(name: str) -> usize {
+    if ends(name: name, tail: ".wav") or ends(name: name, tail: ".mp3") or ends(name: name, tail: ".ogg") or ends(name: name, tail: ".m4a") {
+        return 4;
+    }
+    if ends(name: name, tail: ".flac") {
+        return 5;
+    }
+    return 0;
 }
 
 /// Whether name ends with tail, in any case of ASCII letters.
@@ -98,80 +378,705 @@ fn ends(name: str, tail: str) -> bool {
     return true;
 }
 
-/// The length of name's extension when it is a music file's the phone
-/// plays (WAV, FLAC, Ogg Vorbis, MP3), with its dot; 0 for another.
-fn music_ext(name: str) -> usize {
-    if ends(name: name, tail: ".wav") or ends(name: name, tail: ".mp3") or ends(name: name, tail: ".ogg") {
-        return 4;
-    }
-    if ends(name: name, tail: ".flac") {
-        return 5;
-    }
-    return 0;
-}
-
-/// The rows, the one that plays marked, and what plays.
-fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
-    for old in dom.children(host, item: state.rows, a: a).items() {
-        dom.release(host, item: old.*);
-    }
-    var count: u32 = 0;
+/// The songs of the Music folder, each with its tags, by their titles.
+fn load(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
+    var songs = alloc.List(Song).init(a);
     for e in files.list(host, path: FOLDER, a: a).items() {
-        if e.folder or music_ext(e.name.view()) == 0 {
+        let n = e.name.view();
+        if e.folder or n.starts_with(".") or music_ext(n) == 0 {
             continue;
         }
-        count += 1;
         var path = alloc.String.from(FOLDER, a);
         path.push_str("/");
-        path.push_str(e.name.view());
-        let on = path.view().eq(state.shown.view());
-        let row = dom.create_element(host, tag: "button");
-        if on {
-            dom.set_attribute(host, item: row, name: "class", value_: "row on");
-        } else {
-            dom.set_attribute(host, item: row, name: "class", value_: "row");
+        path.push_str(n);
+        var song = Song { name: alloc.String.from(n, a), title: alloc.String.from(n[0..n.len() - music_ext(n)], a), artist: alloc.String.init(a), album: alloc.String.init(a), ms: 0, cover: NO_IMAGE, tint: alloc.String.from(appkit.avatar_color(n), a) };
+        tags(host, path: path.view(), size: e.size, song: &mut song, a: a);
+        if song.artist.len() == 0 {
+            song.artist = alloc.String.from("Unknown artist", a);
         }
-        var k = alloc.String.from("s:", a);
-        k.push_str(e.name.view());
-        dom.set_attribute(host, item: row, name: "data-k", value_: k.view());
-        // Its note on a tile, its name over what a tap does.
-        let tile = dom.create_element(host, tag: "div");
-        dom.set_attribute(host, item: tile, name: "class", value_: "tile");
-        dom.set_attribute(host, item: tile, name: "style", value_: "background: #f0476a");
-        let glyph = dom.create_element(host, tag: "span");
-        dom.set_attribute(host, item: glyph, name: "class", value_: "icon fill");
-        dom.set_text(host, item: glyph, text: "music_note");
-        dom.append_child(host, parent_: tile, child: glyph);
-        dom.append_child(host, parent_: row, child: tile);
-        let lines = dom.create_element(host, tag: "div");
-        dom.set_attribute(host, item: lines, name: "class", value_: "lines");
-        line(host, parent_: lines, class: "primary name", text: title_of(e.name.view()), a: a);
-        if on {
-            line(host, parent_: lines, class: "secondary what", text: "Playing", a: a);
-        } else {
-            line(host, parent_: lines, class: "secondary what", text: "Tap to play", a: a);
-        }
-        dom.append_child(host, parent_: row, child: lines);
-        dom.append_child(host, parent_: state.rows, child: row);
+        songs.push(song);
     }
-    dom.toggle_class(host, item: state.empty, name: "hidden", on: count > 0);
-    dom.toggle_class(host, item: state.now, name: "hidden", on: state.shown.len() == 0);
-    if state.shown.len() > 0 {
-        var s = alloc.String.from("Playing ", a);
-        let b = state.shown.view().bytes();
-        var cut = b.len();
-        while cut > 0 and b[cut - 1] != '/' {
-            cut -= 1;
+    // By title, as a player lists them.
+    var order = alloc.List(usize).init(a);
+    var j: usize = 0;
+    while j < songs.len() : (j += 1) {
+        order.push(j);
+        var at = order.len() - 1;
+        while at > 0 and before(x: songs.items()[order.items()[at]].title.view(), y: songs.items()[order.items()[at - 1]].title.view()) {
+            let t = order.items()[at];
+            let u = order.items()[at - 1];
+            order.items_mut()[at] = u;
+            order.items_mut()[at - 1] = t;
+            at -= 1;
         }
-        s.push_str(title_of(state.shown.view()[cut..b.len()]));
-        dom.set_text(host, item: state.playing, text: s.view());
+    }
+    var sorted = alloc.List(Song).init(a);
+    for o in order.items() {
+        let x = &songs.items()[o.*];
+        sorted.push(Song { name: alloc.String.from(x.name.view(), a), title: alloc.String.from(x.title.view(), a), artist: alloc.String.from(x.artist.view(), a), album: alloc.String.from(x.album.view(), a), ms: x.ms, cover: x.cover, tint: alloc.String.from(x.tint.view(), a) });
+    }
+    state.songs = sorted;
+    order_from(state, k: 0, a: a);
+}
+
+/// Whether x comes before y, in any case of ASCII letters.
+fn before(x: str, y: str) -> bool {
+    let xb = x.bytes();
+    let yb = y.bytes();
+    var i: usize = 0;
+    while i < xb.len() and i < yb.len() : (i += 1) {
+        var p = xb[i];
+        var q = yb[i];
+        if p >= 'A' and p <= 'Z' {
+            p += 32;
+        }
+        if q >= 'A' and q <= 'Z' {
+            q += 32;
+        }
+        if p != q {
+            return p < q;
+        }
+    }
+    return xb.len() < yb.len();
+}
+
+/// A song's tags and length, from its first bytes (and an MP4's last, its
+/// moov box often there).
+fn tags(host: &mut std.Host, path: str, size: u64, song: &mut Song, a: alloc.Allocator) {
+    let head = files.read_part(host, path: path, from: 0, len: 262144, a: a) orelse return;
+    let b = head.items();
+    if b.len() >= 10 and b[0] == 'I' and b[1] == 'D' and b[2] == '3' {
+        let id3 = id3_tags(host, b: b, song: song, a: a);
+        song.ms = mp3_ms(b, from: id3, size: size);
+    } else if b.len() >= 4 and b[0] == 'f' and b[1] == 'L' and b[2] == 'a' and b[3] == 'C' {
+        flac_tags(host, b: b, song: song, a: a);
+    } else if b.len() >= 4 and b[0] == 'O' and b[1] == 'g' and b[2] == 'g' and b[3] == 'S' {
+        ogg_tags(b, song: song, a: a);
+        // Its last page's granule by its rate: its length.
+        var from: u64 = 0;
+        if size > 65536 {
+            from = size - 65536;
+        }
+        let tail = files.read_part(host, path: path, from: from, len: 65536, a: a) orelse return;
+        song.ms = ogg_ms(head: b, tail: tail.items());
+    } else if b.len() >= 8 and b[4] == 'f' and b[5] == 't' and b[6] == 'y' and b[7] == 'p' {
+        if not mp4_tags(host, b: b, song: song, a: a) and size > 262144 {
+            var from: u64 = 0;
+            if size > 1048576 {
+                from = size - 1048576;
+            }
+            let tail = files.read_part(host, path: path, from: from, len: 1048576, a: a) orelse return;
+            _ = mp4_tags(host, b: tail.items(), song: song, a: a);
+        }
+    } else if b.len() >= 4 and (b[0] == 0xFF and (b[1] & 0xE0) == 0xE0) {
+        song.ms = mp3_ms(b, from: 0, size: size);
     }
 }
 
-/// A song's name: its file's, without its extension.
-fn title_of(name: str) -> str {
-    let ext = music_ext(name);
-    return name[0..name.len() - ext];
+fn be32(b: []u8, at: usize) -> u32 {
+    return ((b[at] as u32) << 24) | ((b[at + 1] as u32) << 16) | ((b[at + 2] as u32) << 8) | (b[at + 3] as u32);
+}
+
+fn le32(b: []u8, at: usize) -> u32 {
+    return (b[at] as u32) | ((b[at + 1] as u32) << 8) | ((b[at + 2] as u32) << 16) | ((b[at + 3] as u32) << 24);
+}
+
+/// A code point onto out, as UTF-8.
+fn push_point(out: &mut alloc.String, c: u32) {
+    var buf: [4]u8 = [0; 4];
+    var n: usize = 0;
+    if c < 0x80 {
+        buf[0] = c as u8;
+        n = 1;
+    } else if c < 0x800 {
+        buf[0] = (0xC0 | (c >> 6)) as u8;
+        buf[1] = (0x80 | (c & 0x3F)) as u8;
+        n = 2;
+    } else if c < 0x10000 {
+        buf[0] = (0xE0 | (c >> 12)) as u8;
+        buf[1] = (0x80 | ((c >> 6) & 0x3F)) as u8;
+        buf[2] = (0x80 | (c & 0x3F)) as u8;
+        n = 3;
+    } else if c < 0x110000 {
+        buf[0] = (0xF0 | (c >> 18)) as u8;
+        buf[1] = (0x80 | ((c >> 12) & 0x3F)) as u8;
+        buf[2] = (0x80 | ((c >> 6) & 0x3F)) as u8;
+        buf[3] = (0x80 | (c & 0x3F)) as u8;
+        n = 4;
+    }
+    _ = out.push_utf8(buf[0..n]);
+}
+
+/// An ID3 text, its encoding its first byte: Latin-1, UTF-16 with its BOM,
+/// UTF-16 BE, UTF-8; up to its end or a NUL.
+fn id3_text(b: []u8, a: alloc.Allocator) -> alloc.String {
+    var out = alloc.String.init(a);
+    if b.len() == 0 {
+        return out;
+    }
+    let enc = b[0];
+    let t = b[1..b.len()];
+    if enc == 0 {
+        for c in t {
+            if c.* == 0 {
+                break;
+            }
+            push_point(&mut out, c: c.* as u32);
+        }
+    } else if enc == 3 {
+        var n: usize = 0;
+        while n < t.len() and t[n] != 0 : (n += 1) {
+        }
+        _ = out.push_utf8(t[0..n]);
+    } else {
+        var big = enc == 2;
+        var at: usize = 0;
+        if enc == 1 and t.len() >= 2 {
+            big = t[0] == 0xFE and t[1] == 0xFF;
+            at = 2;
+        }
+        while at + 1 < t.len() : (at += 2) {
+            var u: u32 = 0;
+            if big {
+                u = ((t[at] as u32) << 8) | (t[at + 1] as u32);
+            } else {
+                u = (t[at] as u32) | ((t[at + 1] as u32) << 8);
+            }
+            if u == 0 {
+                break;
+            }
+            if u >= 0xD800 and u < 0xDC00 and at + 3 < t.len() {
+                var lo: u32 = 0;
+                if big {
+                    lo = ((t[at + 2] as u32) << 8) | (t[at + 3] as u32);
+                } else {
+                    lo = (t[at + 2] as u32) | ((t[at + 3] as u32) << 8);
+                }
+                u = 0x10000 + ((u - 0xD800) << 10) + (lo - 0xDC00);
+                at += 2;
+            }
+            push_point(&mut out, c: u);
+        }
+    }
+    return out;
+}
+
+/// An ID3v2 tag's title, artist, album and picture (v2.3, v2.4); where its
+/// audio begins.
+fn id3_tags(host: &mut std.Host, b: []u8, song: &mut Song, a: alloc.Allocator) -> usize {
+    let version = b[3];
+    let size = ((b[6] as usize & 0x7F) << 21) | ((b[7] as usize & 0x7F) << 14) | ((b[8] as usize & 0x7F) << 7) | (b[9] as usize & 0x7F);
+    let end = size + 10;
+    if version == 2 {
+        id3_v22(host, b: b, end: end, song: song, a: a);
+        return end;
+    }
+    if version < 3 {
+        return end;
+    }
+    var at: usize = 10;
+    while at + 10 <= end and at + 10 <= b.len() {
+        if b[at] == 0 {
+            break;
+        }
+        var len = be32(b, at: at + 4) as usize;
+        if version == 4 {
+            len = ((b[at + 4] as usize & 0x7F) << 21) | ((b[at + 5] as usize & 0x7F) << 14) | ((b[at + 6] as usize & 0x7F) << 7) | (b[at + 7] as usize & 0x7F);
+        }
+        let body = at + 10;
+        if body + len > b.len() {
+            break;
+        }
+        let id = b[at..at + 4];
+        let f = b[body..body + len];
+        if id[0] == 'T' and id[1] == 'I' and id[2] == 'T' and id[3] == '2' {
+            let t = id3_text(f, a: a);
+            if t.len() > 0 {
+                song.title = t;
+            }
+        } else if id[0] == 'T' and id[1] == 'P' and id[2] == 'E' and id[3] == '1' {
+            song.artist = id3_text(f, a: a);
+        } else if id[0] == 'T' and id[1] == 'A' and id[2] == 'L' and id[3] == 'B' {
+            song.album = id3_text(f, a: a);
+        } else if id[0] == 'A' and id[1] == 'P' and id[2] == 'I' and id[3] == 'C' and song.cover == NO_IMAGE and f.len() > 4 {
+            // Its encoding, its type's name, the picture's kind, its
+            // description, then the picture.
+            let enc = f[0];
+            var p: usize = 1;
+            while p < f.len() and f[p] != 0 : (p += 1) {
+            }
+            p += 2;
+            if enc == 1 or enc == 2 {
+                while p + 1 < f.len() and not (f[p] == 0 and f[p + 1] == 0) : (p += 2) {
+                }
+                p += 2;
+            } else {
+                while p < f.len() and f[p] != 0 : (p += 1) {
+                }
+                p += 1;
+            }
+            if p < f.len() {
+                song.cover = picture(host, bytes: f[p..f.len()], a: a);
+            }
+        }
+        at = body + len;
+    }
+    return end;
+}
+
+/// An ID3v2.2 tag's frames (TT2, TP1, TAL, PIC), up to end: three letters
+/// and three bytes of size each, as older taggers wrote them.
+fn id3_v22(host: &mut std.Host, b: []u8, end: usize, song: &mut Song, a: alloc.Allocator) {
+    var at: usize = 10;
+    while at + 6 <= end and at + 6 <= b.len() {
+        if b[at] == 0 {
+            return;
+        }
+        let len = ((b[at + 3] as usize) << 16) | ((b[at + 4] as usize) << 8) | (b[at + 5] as usize);
+        let body = at + 6;
+        if body + len > b.len() {
+            return;
+        }
+        let f = b[body..body + len];
+        if b[at] == 'T' and b[at + 1] == 'T' and b[at + 2] == '2' {
+            let t = id3_text(f, a: a);
+            if t.len() > 0 {
+                song.title = t;
+            }
+        } else if b[at] == 'T' and b[at + 1] == 'P' and b[at + 2] == '1' {
+            song.artist = id3_text(f, a: a);
+        } else if b[at] == 'T' and b[at + 1] == 'A' and b[at + 2] == 'L' {
+            song.album = id3_text(f, a: a);
+        } else if b[at] == 'P' and b[at + 1] == 'I' and b[at + 2] == 'C' and song.cover == NO_IMAGE and f.len() > 6 {
+            // Its encoding, a three-letter format, the picture's kind, its
+            // description, then the picture.
+            var p: usize = 5;
+            if f[0] == 1 {
+                while p + 1 < f.len() and not (f[p] == 0 and f[p + 1] == 0) : (p += 2) {
+                }
+                p += 2;
+            } else {
+                while p < f.len() and f[p] != 0 : (p += 1) {
+                }
+                p += 1;
+            }
+            if p < f.len() {
+                song.cover = picture(host, bytes: f[p..f.len()], a: a);
+            }
+        }
+        at = body + len;
+    }
+}
+
+/// A picture's bytes made an image by the shell: its number.
+fn picture(host: &mut std.Host, bytes: []u8, a: alloc.Allocator) -> u32 {
+    var why = alloc.String.init(a);
+    return host_api.image_load(host, bytes: bytes, why: &mut why, a: a) orelse NO_IMAGE;
+}
+
+/// An MP3's length, in ms, from its first frame at or after from: its
+/// Xing or Info header's frames, or else its bit rate over its size.
+fn mp3_ms(b: []u8, from: usize, size: u64) -> u64 {
+    var at = from;
+    while at + 4 <= b.len() and not (b[at] == 0xFF and (b[at + 1] & 0xE0) == 0xE0) : (at += 1) {
+    }
+    if at + 4 > b.len() {
+        return 0;
+    }
+    let h = be32(b, at: at);
+    let mpeg1 = ((h >> 19) & 3) == 3;
+    let rates_1: [16]u32 = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0];
+    let rates_2: [16]u32 = [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0];
+    var kbps = rates_2[((h >> 12) & 15) as usize];
+    if mpeg1 {
+        kbps = rates_1[((h >> 12) & 15) as usize];
+    }
+    let srates: [4]u32 = [44100, 48000, 32000, 0];
+    var rate = srates[((h >> 10) & 3) as usize];
+    let version = (h >> 19) & 3;
+    if version == 2 {
+        rate = rate / 2;
+    } else if version == 0 {
+        rate = rate / 4;
+    }
+    if rate == 0 {
+        return 0;
+    }
+    let mono = ((h >> 6) & 3) == 3;
+    var side: usize = 17;
+    if mpeg1 and not mono {
+        side = 32;
+    } else if not mpeg1 and mono {
+        side = 9;
+    }
+    var samples: u64 = 576;
+    if mpeg1 {
+        samples = 1152;
+    }
+    let x = at + 4 + side;
+    if x + 12 <= b.len() and ((b[x] == 'X' and b[x + 1] == 'i' and b[x + 2] == 'n' and b[x + 3] == 'g') or (b[x] == 'I' and b[x + 1] == 'n' and b[x + 2] == 'f' and b[x + 3] == 'o')) {
+        let flags = be32(b, at: x + 4);
+        if flags & 1 != 0 {
+            let frames = be32(b, at: x + 8) as u64;
+            return frames * samples * 1000 / (rate as u64);
+        }
+    }
+    if kbps == 0 or size <= at as u64 {
+        return 0;
+    }
+    return (size - at as u64) * 8 / (kbps as u64);
+}
+
+/// A Vorbis comment's field onto the song: TITLE, ARTIST, ALBUM.
+fn comment(c: []u8, song: &mut Song, a: alloc.Allocator) {
+    var eq: usize = 0;
+    while eq < c.len() and c[eq] != '=' : (eq += 1) {
+    }
+    if eq >= c.len() {
+        return;
+    }
+    var key = alloc.String.init(a);
+    var i: usize = 0;
+    while i < eq : (i += 1) {
+        var ch = c[i];
+        if ch >= 'a' and ch <= 'z' {
+            ch -= 32;
+        }
+        key.push_ascii(ch);
+    }
+    var value = alloc.String.init(a);
+    _ = value.push_utf8(c[eq + 1..c.len()]);
+    if key.view().eq("TITLE") and value.len() > 0 {
+        song.title = value;
+    } else if key.view().eq("ARTIST") {
+        song.artist = value;
+    } else if key.view().eq("ALBUM") {
+        song.album = value;
+    }
+}
+
+/// A Vorbis comment block at b: its vendor, then its fields.
+fn comments(b: []u8, song: &mut Song, a: alloc.Allocator) {
+    if b.len() < 8 {
+        return;
+    }
+    var at = 4 + le32(b, at: 0) as usize;
+    if at + 4 > b.len() {
+        return;
+    }
+    let n = le32(b, at: at);
+    at += 4;
+    var k: u32 = 0;
+    while k < n and at + 4 <= b.len() : (k += 1) {
+        let len = le32(b, at: at) as usize;
+        at += 4;
+        if at + len > b.len() {
+            return;
+        }
+        comment(b[at..at + len], song: song, a: a);
+        at += len;
+    }
+}
+
+/// A FLAC's blocks: its length (STREAMINFO), its comments and picture.
+fn flac_tags(host: &mut std.Host, b: []u8, song: &mut Song, a: alloc.Allocator) {
+    var at: usize = 4;
+    while at + 4 <= b.len() {
+        let last = (b[at] & 0x80) != 0;
+        let kind = b[at] & 0x7F;
+        let len = ((b[at + 1] as usize) << 16) | ((b[at + 2] as usize) << 8) | (b[at + 3] as usize);
+        let body = at + 4;
+        if body + len > b.len() {
+            return;
+        }
+        let f = b[body..body + len];
+        if kind == 0 and len >= 18 {
+            let rate = ((f[10] as u64) << 12) | ((f[11] as u64) << 4) | ((f[12] as u64) >> 4);
+            let total = (((f[13] & 0x0F) as u64) << 32) | (be32(f, at: 14) as u64);
+            if rate > 0 {
+                song.ms = total * 1000 / rate;
+            }
+        } else if kind == 4 {
+            comments(f, song: song, a: a);
+        } else if kind == 6 and len > 32 and song.cover == NO_IMAGE {
+            // Its type, its MIME type's length and name, its description's,
+            // its size and depth and colors, then the picture.
+            var p: usize = 4;
+            p += 4 + be32(f, at: p) as usize;
+            if p + 4 <= f.len() {
+                p += 4 + be32(f, at: p) as usize;
+                p += 16;
+                if p + 4 <= f.len() {
+                    let n = be32(f, at: p) as usize;
+                    p += 4;
+                    if p + n <= f.len() {
+                        song.cover = picture(host, bytes: f[p..p + n], a: a);
+                    }
+                }
+            }
+        }
+        if last {
+            return;
+        }
+        at = body + len;
+    }
+}
+
+/// An Ogg Vorbis's comments: its second packet, after "\x03vorbis".
+fn ogg_tags(b: []u8, song: &mut Song, a: alloc.Allocator) {
+    var at: usize = 0;
+    while at + 7 <= b.len() {
+        if b[at] == 3 and b[at + 1] == 'v' and b[at + 2] == 'o' and b[at + 3] == 'r' and b[at + 4] == 'b' and b[at + 5] == 'i' and b[at + 6] == 's' {
+            comments(b[at + 7..b.len()], song: song, a: a);
+            return;
+        }
+        at += 1;
+    }
+}
+
+/// An Ogg Vorbis's length, in ms: its last page's granule by the rate its
+/// first packet says.
+fn ogg_ms(head: []u8, tail: []u8) -> u64 {
+    var rate: u64 = 0;
+    var at: usize = 0;
+    while at + 16 <= head.len() {
+        if head[at] == 1 and head[at + 1] == 'v' and head[at + 2] == 'o' and head[at + 3] == 'r' {
+            rate = le32(head, at: at + 12) as u64;
+            break;
+        }
+        at += 1;
+    }
+    if rate == 0 {
+        return 0;
+    }
+    var granule: u64 = 0;
+    var k: usize = 0;
+    while k + 14 <= tail.len() : (k += 1) {
+        if tail[k] == 'O' and tail[k + 1] == 'g' and tail[k + 2] == 'g' and tail[k + 3] == 'S' {
+            granule = (le32(tail, at: k + 6) as u64) | ((le32(tail, at: k + 10) as u64) << 32);
+        }
+    }
+    return granule * 1000 / rate;
+}
+
+/// An MP4's title, artist, album and cover (moov's udta's ilst) and its
+/// length (mvhd); whether its moov was in b.
+fn mp4_tags(host: &mut std.Host, b: []u8, song: &mut Song, a: alloc.Allocator) -> bool {
+    var found = false;
+    var at: usize = 4;
+    while at + 32 <= b.len() {
+        if b[at] == 'm' and b[at + 1] == 'v' and b[at + 2] == 'h' and b[at + 3] == 'd' {
+            found = true;
+            let v = b[at + 4];
+            if v == 1 and at + 40 <= b.len() {
+                let scale = be32(b, at: at + 24) as u64;
+                let dur = ((be32(b, at: at + 28) as u64) << 32) | (be32(b, at: at + 32) as u64);
+                if scale > 0 {
+                    song.ms = dur * 1000 / scale;
+                }
+            } else {
+                let scale = be32(b, at: at + 16) as u64;
+                if scale > 0 {
+                    song.ms = (be32(b, at: at + 20) as u64) * 1000 / scale;
+                }
+            }
+        }
+        // An ilst item: its name, then its data box: 8 of its own, a type
+        // and a locale, then the value.
+        if at >= 4 and b[at + 4] == 'd' and b[at + 5] == 'a' and b[at + 6] == 't' and b[at + 7] == 'a' {
+            let item = b[at - 4..at];
+            let len = be32(b, at: at) as usize;
+            if len >= 16 and at + len <= b.len() {
+                let v = b[at + 16..at + len];
+                if item[0] == 0xA9 and item[1] == 'n' and item[2] == 'a' and item[3] == 'm' {
+                    var t = alloc.String.init(a);
+                    _ = t.push_utf8(v);
+                    if t.len() > 0 {
+                        song.title = t;
+                    }
+                } else if item[0] == 0xA9 and item[1] == 'A' and item[2] == 'R' and item[3] == 'T' {
+                    var t = alloc.String.init(a);
+                    _ = t.push_utf8(v);
+                    song.artist = t;
+                } else if item[0] == 0xA9 and item[1] == 'a' and item[2] == 'l' and item[3] == 'b' {
+                    var t = alloc.String.init(a);
+                    _ = t.push_utf8(v);
+                    song.album = t;
+                } else if item[0] == 'c' and item[1] == 'o' and item[2] == 'v' and item[3] == 'r' and song.cover == NO_IMAGE {
+                    song.cover = picture(host, bytes: v, a: a);
+                }
+            }
+        }
+        at += 1;
+    }
+    return found;
+}
+
+/// A length as a player says it: 3:25, 1:02:10.
+fn time_said(ms: u64, out: &mut alloc.String) {
+    let s = ms / 1000;
+    if s >= 3600 {
+        out.push_u64(s / 3600);
+        out.push_str(":");
+        if s / 60 % 60 < 10 {
+            out.push_str("0");
+        }
+    }
+    out.push_u64(s / 60 % 60);
+    out.push_str(":");
+    if s % 60 < 10 {
+        out.push_str("0");
+    }
+    out.push_u64(s % 60);
+}
+
+/// "Artist · Album", or the artist alone.
+fn by(song: &Song, a: alloc.Allocator) -> alloc.String {
+    var s = alloc.String.from(song.artist.view(), a);
+    if song.album.len() > 0 {
+        s.push_str(" · ");
+        s.push_str(song.album.view());
+    }
+    return s;
+}
+
+/// A song's cover into box: its picture, or its color with a note.
+fn cover_into(host: &mut std.Host, box: u32, song: &Song, big: bool, a: alloc.Allocator) {
+    for old in dom.children(host, item: box, a: a).items() {
+        dom.release(host, item: old.*);
+    }
+    var style = alloc.String.from("background: ", a);
+    style.push_str(song.tint.view());
+    dom.set_attribute(host, item: box, name: "style", value_: style.view());
+    if song.cover != NO_IMAGE {
+        let img = dom.create_element(host, tag: "img");
+        var src = alloc.String.init(a);
+        src.push_u64(song.cover as u64);
+        dom.set_attribute(host, item: img, name: "src", value_: src.view());
+        dom.append_child(host, parent_: box, child: img);
+        return;
+    }
+    let glyph = dom.create_element(host, tag: "span");
+    dom.set_attribute(host, item: glyph, name: "class", value_: "icon fill");
+    dom.set_text(host, item: glyph, text: "music_note");
+    dom.append_child(host, parent_: box, child: glyph);
+}
+
+/// The page as it is: the rows made once, the one playing marked; the bar
+/// at the bottom and the player.
+fn show(state: &mut Music, host: &mut std.Host, a: alloc.Allocator) {
+    if not state.made {
+        state.made = true;
+        var count = alloc.String.init(a);
+        count.push_u64(state.songs.len() as u64);
+        if state.songs.len() == 1 {
+            count.push_str(" song");
+        } else {
+            count.push_str(" songs");
+        }
+        dom.set_text(host, item: state.count, text: count.view());
+        dom.toggle_class(host, item: state.empty, name: "hidden", on: state.songs.len() > 0);
+        var k: usize = 0;
+        while k < state.songs.len() : (k += 1) {
+            let song = &state.songs.items()[k];
+            let row = dom.create_element(host, tag: "button");
+            dom.set_attribute(host, item: row, name: "class", value_: "song");
+            var key = alloc.String.from("s:", a);
+            key.push_u64(k as u64);
+            dom.set_attribute(host, item: row, name: "data-k", value_: key.view());
+            let tile = dom.create_element(host, tag: "div");
+            dom.set_attribute(host, item: tile, name: "class", value_: "cover");
+            dom.append_child(host, parent_: row, child: tile);
+            cover_into(host, box: tile, song: song, big: false, a: a);
+            let lines = dom.create_element(host, tag: "div");
+            dom.set_attribute(host, item: lines, name: "class", value_: "lines");
+            line(host, parent_: lines, class: "primary", text: song.title.view(), a: a);
+            line(host, parent_: lines, class: "secondary", text: by(song, a: a).view(), a: a);
+            dom.append_child(host, parent_: row, child: lines);
+            var len = alloc.String.init(a);
+            if song.ms > 0 {
+                time_said(song.ms, out: &mut len);
+            }
+            line(host, parent_: row, class: "len", text: len.view(), a: a);
+            dom.append_child(host, parent_: state.rows, child: row);
+        }
+    }
+    // The row playing marked.
+    if state.marked != state.current {
+        let rows = dom.children(host, item: state.rows, a: a);
+        if state.marked != NONE and state.marked < rows.len() {
+            dom.toggle_class(host, item: rows.items()[state.marked], name: "on", on: false);
+        }
+        if state.current != NONE and state.current < rows.len() {
+            dom.toggle_class(host, item: rows.items()[state.current], name: "on", on: true);
+        }
+        let had = state.marked;
+        state.marked = state.current;
+        if state.current != NONE {
+            let song = &state.songs.items()[state.current];
+            cover_into(host, box: state.mini_cover, song: song, big: false, a: a);
+            cover_into(host, box: state.art, song: song, big: true, a: a);
+            dom.set_text(host, item: state.mini_title, text: song.title.view());
+            dom.set_text(host, item: state.mini_artist, text: song.artist.view());
+            dom.set_text(host, item: state.pname, text: song.title.view());
+            dom.set_text(host, item: state.partist, text: by(song, a: a).view());
+        }
+        if had == NONE and state.current == NONE {
+            return;
+        }
+    }
+    let on = state.current != NONE and state.playing.len() > 0;
+    dom.toggle_class(host, item: state.mini, name: "hidden", on: not on or state.open);
+    dom.toggle_class(host, item: state.player, name: "hidden", on: not state.open);
+    dom.toggle_class(host, item: state.list, name: "hidden", on: state.open);
+    if state.open {
+        dom.set_attribute(host, item: dom.root(host), name: "data-back", value_: "1");
+    } else {
+        dom.remove_attribute(host, item: dom.root(host), name: "data-back");
+    }
+    if not on {
+        if state.open and state.current == NONE {
+            state.open = false;
+        }
+        return;
+    }
+    let paused = audio.paused(host);
+    var glyph = "pause";
+    if paused {
+        glyph = "play_arrow";
+    }
+    dom.set_text(host, item: state.mini_play, text: glyph);
+    dom.set_text(host, item: state.play_icon, text: glyph);
+    // How far it is: the bars' widths, and the times.
+    let ms = song_ms(state, host: host);
+    let pos = audio.position(host) as u64;
+    var part: u64 = 0;
+    if ms > 0 {
+        part = pos * 1000 / ms;
+        if part > 1000 {
+            part = 1000;
+        }
+    }
+    var width = alloc.String.from("width: ", a);
+    width.push_u64(part / 10);
+    width.push_str(".");
+    width.push_u64(part % 10);
+    width.push_str("%");
+    dom.set_attribute(host, item: state.mini_done, name: "style", value_: width.view());
+    dom.set_attribute(host, item: state.fill, name: "style", value_: width.view());
+    var at = alloc.String.init(a);
+    time_said(pos, out: &mut at);
+    dom.set_text(host, item: state.at_time, text: at.view());
+    var all = alloc.String.init(a);
+    time_said(ms, out: &mut all);
+    dom.set_text(host, item: state.all_time, text: all.view());
+    dom.toggle_class(host, item: state.shuffle_btn, name: "on", on: state.shuffle);
+    dom.toggle_class(host, item: state.repeat_btn, name: "on", on: state.repeat != REPEAT_OFF);
+    if state.repeat == REPEAT_ONE {
+        dom.set_text(host, item: state.repeat_icon, text: "repeat_one");
+    } else {
+        dom.set_text(host, item: state.repeat_icon, text: "repeat");
+    }
 }
 
 /// A div of class with text, last under parent_.
@@ -180,6 +1085,18 @@ fn line(host: &mut std.Host, parent_: u32, class: str, text: str, a: alloc.Alloc
     dom.set_attribute(host, item: d, name: "class", value_: class);
     dom.set_text(host, item: d, text: text);
     dom.append_child(host, parent_: parent_, child: d);
+}
+
+/// The number s begins with.
+fn number(s: str) -> u64 {
+    var n: u64 = 0;
+    for c in s.bytes() {
+        if c.* < '0' or c.* > '9' {
+            break;
+        }
+        n = n * 10 + (c.* - '0') as u64;
+    }
+    return n;
 }
 
 /// The first node under the page that selector finds; 0 for none.
